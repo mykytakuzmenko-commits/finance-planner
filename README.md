@@ -62,7 +62,7 @@ is committed, pushed, and verified on the production URL before moving on.
 | 3 | Monthly planning & recurring operations | ✅ Done |
 | 4 | Plan-fact linking & analysis | ✅ Done |
 | 5 | Dashboard, forecast & safe-to-spend | ✅ Done |
-| 6 | Weekly budget | ⏳ |
+| 6 | Weekly budget | ✅ Done |
 | 7 | Savings, emergency fund & currencies | ⏳ |
 | 8 | Macro data | ⏳ |
 | 9 | Recommendation engine | ⏳ |

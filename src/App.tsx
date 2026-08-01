@@ -6,6 +6,7 @@ import { OnboardingPage } from './pages/OnboardingPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 import { PlanningPage } from './pages/PlanningPage'
+import { WeeklyPage } from './pages/WeeklyPage'
 import { AnalysisPage } from './pages/AnalysisPage'
 import { SettingsPage } from './pages/SettingsPage'
 
@@ -18,6 +19,7 @@ const ROUTES: Record<string, RouteDef> = {
   '/': { title: 'Дашборд', element: <DashboardPage /> },
   '/transactions': { title: 'Операції', element: <TransactionsPage /> },
   '/planning': { title: 'Планування', element: <PlanningPage /> },
+  '/weekly': { title: 'Тижневий бюджет', element: <WeeklyPage /> },
   '/analysis': { title: 'Аналітика', element: <AnalysisPage /> },
   '/settings': { title: 'Налаштування', element: <SettingsPage /> },
 }

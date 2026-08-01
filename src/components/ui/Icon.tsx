@@ -10,6 +10,7 @@ export type IconName =
   | 'wallet'
   | 'close'
   | 'check'
+  | 'week'
 
 const PATHS: Record<IconName, string> = {
   dashboard: 'M3 3h8v8H3V3Zm10 0h8v5h-8V3ZM3 13h8v8H3v-8Zm10 3h8v5h-8v-5Z',
@@ -24,6 +25,7 @@ const PATHS: Record<IconName, string> = {
     'M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9M16 12h.01',
   close: 'M18 6 6 18M6 6l12 12',
   check: 'M20 6 9 17l-5-5',
+  week: 'M4 7h11M4 12h16M4 17h7',
 }
 
 interface IconProps extends SVGProps<SVGSVGElement> {
