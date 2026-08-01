@@ -27,8 +27,8 @@ export function PlanningPage() {
   const [deleting, setDeleting] = useState<PlanItem | null>(null)
 
   useEffect(() => {
-    void ensureMonth(month)
-  }, [month, ensureMonth])
+    if (!loading) void ensureMonth(month)
+  }, [month, loading, ensureMonth])
 
   const items = itemsForMonth(month)
   const income = items.filter((i) => i.kind === 'income')

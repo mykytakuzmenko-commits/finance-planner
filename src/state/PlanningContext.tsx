@@ -26,7 +26,7 @@ import {
 } from '../db/database'
 import { createId } from '../utils/id'
 import { currentMonth, monthAbs } from '../utils/month'
-import { generateItemsForMonth } from '../calculations/planning'
+import { generateItemsForMonth, templateAppliesTo } from '../calculations/planning'
 
 export type PlanRecurrence = 'once' | PlanCadence
 
@@ -67,38 +67,61 @@ export function PlanningProvider({ children }: { children: ReactNode }) {
   const [months, setMonths] = useState<string[]>([])
 
   // Latest snapshot for use inside async callbacks without stale closures.
-  const ref = useRef({ templates, months })
-  ref.current = { templates, months }
+  const ref = useRef({ templates, months, items })
+  ref.current = { templates, months, items }
 
-  // Prevents duplicate materialization of the same month under races.
+  // Prevents duplicate reconciliation of the same month under races.
   const inFlight = useRef(new Map<string, Promise<void>>())
 
-  const materialize = useCallback(
-    async (month: string, templatesSnapshot: PlanTemplate[]) => {
-      const generated = generateItemsForMonth(month, templatesSnapshot)
-      const record: PlanMonth = { month, createdAt: Date.now() }
-      await Promise.all([
-        putRecord(STORES.planMonths, record),
-        bulkPut(STORES.planItems, generated),
-      ])
-      setMonths((prev) => (prev.includes(month) ? prev : [...prev, month]))
-      if (generated.length > 0) setItems((prev) => [...prev, ...generated])
-    },
-    [],
-  )
+  /**
+   * Make a month consistent with the active templates: register it if new, and
+   * add any items for applicable templates that are missing. This is idempotent
+   * and self-healing — opening a month that was created before a recurring line
+   * existed will backfill the missing item.
+   */
+  const reconcile = useCallback(async (month: string) => {
+    const { templates: tpls, months: mts, items: its } = ref.current
+    const isNew = !mts.includes(month)
+    const present = new Set(
+      its.filter((i) => i.month === month && i.templateId).map((i) => i.templateId),
+    )
+    const now = Date.now()
+    const missing: PlanItem[] = tpls
+      .filter((t) => templateAppliesTo(t, month) && !present.has(t.id))
+      .map((t, i) => ({
+        id: createId(),
+        month,
+        kind: t.kind,
+        name: t.name,
+        amount: t.amount,
+        categoryId: t.categoryId,
+        probability: t.probability,
+        templateId: t.id,
+        createdAt: now + i,
+      }))
+
+    const ops: Promise<unknown>[] = []
+    if (isNew) {
+      ops.push(putRecord(STORES.planMonths, { month, createdAt: now } as PlanMonth))
+    }
+    if (missing.length) ops.push(bulkPut(STORES.planItems, missing))
+    if (ops.length) await Promise.all(ops)
+
+    if (isNew) setMonths((prev) => (prev.includes(month) ? prev : [...prev, month]))
+    if (missing.length) setItems((prev) => [...prev, ...missing])
+  }, [])
 
   const ensureMonth = useCallback(
     (month: string): Promise<void> => {
-      if (ref.current.months.includes(month)) return Promise.resolve()
       const existing = inFlight.current.get(month)
       if (existing) return existing
-      const p = materialize(month, ref.current.templates).finally(() => {
+      const p = reconcile(month).finally(() => {
         inFlight.current.delete(month)
       })
       inFlight.current.set(month, p)
       return p
     },
-    [materialize],
+    [reconcile],
   )
 
   useEffect(() => {
@@ -166,6 +189,9 @@ export function PlanningProvider({ children }: { children: ReactNode }) {
       active: true,
       createdAt: Date.now(),
     }
+
+    // Add the item to the month it was created in. Other already-created months
+    // (and any opened later) are backfilled by reconcile() when they are viewed.
     const item: PlanItem = {
       ...base,
       id: createId(),
