@@ -50,7 +50,7 @@ stack.
 The `main` branch auto-deploys to Vercel over HTTPS. Every completed milestone
 is committed, pushed, and verified on the production URL before moving on.
 
-- **Production URL:** _to be added once Vercel is connected_
+- **Production URL:** https://finance-planner-taupe.vercel.app/
 
 ## Milestone plan
 
