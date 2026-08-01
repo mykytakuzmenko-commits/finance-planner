@@ -567,14 +567,20 @@ h3 {
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    padding: 4px 2px;
+    padding: 4px 1px;
     flex: 1;
     min-width: 0;
     color: var(--text-faint);
     text-decoration: none;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     font-weight: 600;
     text-align: center;
+  }
+  .mobilenav-link span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .mobilenav-link--active {
     color: var(--accent);
@@ -1696,4 +1702,76 @@ h3 {
   justify-content: space-between;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+/* ---------- Milestone 8: macro data ---------- */
+.macro-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.macro-head .section__hint {
+  margin: 0;
+  flex: 1;
+}
+.macro-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.macro-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.macro-card__head .section__title {
+  margin: 0;
+}
+.macro-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  flex-wrap: wrap;
+}
+.macro-rates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.macro-rate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.macro-rate__pair {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.macro-rate__val {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+.macro-big {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 700px) {
+  .macro-rates {
+    grid-template-columns: 1fr;
+  }
 }
