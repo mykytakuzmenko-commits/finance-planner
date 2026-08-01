@@ -1212,6 +1212,252 @@ h3 {
   font-size: 0.85rem;
 }
 
+/* ---------- Milestone 5: dashboard ---------- */
+.dash-month {
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+.alert--danger {
+  background: var(--danger-soft);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fecaca;
+}
+.alert--warning {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fde68a;
+}
+.alert strong {
+  color: inherit;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.hero-card--accent {
+  background: linear-gradient(160deg, rgba(74, 222, 128, 0.14), var(--bg-card) 70%);
+  border-color: rgba(74, 222, 128, 0.3);
+}
+.hero-card--accent.is-negative {
+  background: linear-gradient(160deg, rgba(248, 113, 113, 0.14), var(--bg-card) 70%);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+.hero-card__label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.hero-card__value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.hero-card--accent .hero-card__value {
+  color: var(--accent);
+}
+.hero-card--accent.is-negative .hero-card__value {
+  color: var(--danger);
+}
+.hero-card__hint {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.kpi-row--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Forecast panel */
+.forecast {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.forecast__row {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+.forecast__meta {
+  display: flex;
+  flex-direction: column;
+}
+.forecast__label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.forecast__hint {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+.forecast__track {
+  height: 10px;
+  background: var(--bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.forecast__fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+.forecast__fill--guaranteed {
+  background: #38bdf8;
+}
+.forecast__fill--weighted {
+  background: var(--accent);
+}
+.forecast__fill--optimistic {
+  background: #a78bfa;
+}
+.forecast__fill.is-negative {
+  background: var(--danger);
+}
+.forecast__value {
+  font-weight: 700;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+.forecast__value.is-negative {
+  color: var(--danger);
+}
+
+/* Cash-flow bars */
+.cashflow {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.cashflow__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+.cashflow__total {
+  font-weight: 700;
+}
+.cashflow__track {
+  display: flex;
+  height: 14px;
+  background: var(--bg);
+  border-radius: 7px;
+  overflow: hidden;
+}
+.cashflow__seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+.cashflow__seg--income {
+  background: var(--accent);
+}
+.cashflow__seg--income-soft {
+  background: rgba(74, 222, 128, 0.35);
+}
+.cashflow__seg--expense {
+  background: var(--danger);
+}
+.cashflow__seg--expense-soft {
+  background: rgba(248, 113, 113, 0.35);
+}
+.cashflow__legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+.cashflow__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.dot--solid {
+  background: var(--text-muted);
+}
+.dot--soft {
+  background: rgba(154, 163, 191, 0.4);
+}
+
+/* Upcoming events */
+.event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.event-row__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.event-row__name {
+  font-weight: 600;
+}
+.event-row__amount {
+  margin-left: auto;
+  font-weight: 700;
+}
+.event-row__amount--income {
+  color: var(--accent);
+}
+.event-row__amount--expense {
+  color: var(--danger);
+}
+
 @media (max-width: 700px) {
   .kpi-row {
     grid-template-columns: 1fr;
@@ -1225,8 +1471,18 @@ h3 {
   .kpi__value {
     font-size: 1.15rem;
   }
-  .compare-grid {
+  .compare-grid,
+  .hero-grid {
     grid-template-columns: 1fr;
+  }
+  .kpi-row--3 {
+    grid-template-columns: 1fr;
+  }
+  .forecast__row {
+    grid-template-columns: 1fr auto;
+  }
+  .forecast__track {
+    display: none;
   }
 }
 
