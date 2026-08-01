@@ -59,7 +59,7 @@ is committed, pushed, and verified on the production URL before moving on.
 | 0 | Repository & deployment | ✅ Done |
 | 1 | UI foundation & onboarding | ✅ Done |
 | 2 | Accounts, categories & transactions | ✅ Done |
-| 3 | Monthly planning & recurring operations | ⏳ |
+| 3 | Monthly planning & recurring operations | ✅ Done |
 | 4 | Plan-fact linking & analysis | ⏳ |
 | 5 | Dashboard, forecast & safe-to-spend | ⏳ |
 | 6 | Weekly budget | ⏳ |

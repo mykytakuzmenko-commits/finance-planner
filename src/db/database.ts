@@ -1,10 +1,13 @@
 const DB_NAME = 'pfp'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 export const STORES = {
   accounts: 'accounts',
   categories: 'categories',
   transactions: 'transactions',
+  planTemplates: 'planTemplates',
+  planItems: 'planItems',
+  planMonths: 'planMonths',
 } as const
 
 export type StoreName = (typeof STORES)[keyof typeof STORES]
@@ -19,7 +22,9 @@ function openDB(): Promise<IDBDatabase> {
       const db = req.result
       for (const name of Object.values(STORES)) {
         if (!db.objectStoreNames.contains(name)) {
-          db.createObjectStore(name, { keyPath: 'id' })
+          // planMonths is keyed by its month string; everything else by id.
+          const keyPath = name === STORES.planMonths ? 'month' : 'id'
+          db.createObjectStore(name, { keyPath })
         }
       }
     }

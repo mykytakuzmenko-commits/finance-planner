@@ -867,6 +867,147 @@ h3 {
   font-size: 0.85rem;
 }
 
+/* ---------- Milestone 3: planning ---------- */
+.month-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.month-switcher__label {
+  min-width: 160px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+.month-switcher .icon-btn {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.plan-weighted-note {
+  margin: -8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+.plan-weighted-note strong {
+  color: var(--text);
+}
+
+.empty-actions,
+.plan-list {
+  display: flex;
+}
+.empty-actions {
+  gap: 10px;
+  justify-content: center;
+}
+.plan-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+.plan-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.plan-row__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  min-width: 0;
+}
+.plan-row__main:hover {
+  background: var(--bg-hover);
+}
+.plan-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.plan-row__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.plan-row__subtitle {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+.plan-row__amount {
+  margin-left: auto;
+  font-weight: 700;
+  white-space: nowrap;
+  padding-left: 8px;
+}
+.plan-row__amount--income {
+  color: var(--accent);
+}
+.plan-row__amount--expense {
+  color: var(--danger);
+}
+.plan-tag {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+.plan-tag--once {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 0 4px;
+}
+.plan-prob {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.14);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.scope-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.scope-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.scope-option input {
+  accent-color: var(--accent);
+}
+
 @media (max-width: 700px) {
   .kpi-row {
     grid-template-columns: 1fr;

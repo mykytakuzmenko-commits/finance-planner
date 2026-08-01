@@ -5,14 +5,17 @@ import App from './App.tsx'
 import { RouterProvider } from './router/Router'
 import { SettingsProvider } from './state/SettingsContext'
 import { DataProvider } from './state/DataContext'
+import { PlanningProvider } from './state/PlanningContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SettingsProvider>
       <DataProvider>
-        <RouterProvider>
-          <App />
-        </RouterProvider>
+        <PlanningProvider>
+          <RouterProvider>
+            <App />
+          </RouterProvider>
+        </PlanningProvider>
       </DataProvider>
     </SettingsProvider>
   </StrictMode>,
