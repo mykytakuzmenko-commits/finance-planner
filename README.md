@@ -56,8 +56,8 @@ is committed, pushed, and verified on the production URL before moving on.
 
 | # | Milestone | Status |
 |---|-----------|--------|
-| 0 | Repository & deployment | 🚧 In progress |
-| 1 | UI foundation & onboarding | ⏳ |
+| 0 | Repository & deployment | ✅ Done |
+| 1 | UI foundation & onboarding | ✅ Done |
 | 2 | Accounts, categories & transactions | ⏳ |
 | 3 | Monthly planning & recurring operations | ⏳ |
 | 4 | Plan-fact linking & analysis | ⏳ |
