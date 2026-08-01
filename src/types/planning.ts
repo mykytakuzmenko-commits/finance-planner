@@ -14,6 +14,8 @@ export interface PlanTemplate {
   cadence: PlanCadence
   /** 0–100 for probable income (e.g. a bonus); undefined means certain (100%). */
   probability?: number
+  /** Expected day of month (1–31) — used for plan-to-date. Optional. */
+  dueDay?: number
   /** First month this template applies to, 'YYYY-MM'. Also the quarterly anchor. */
   startMonth: string
   active: boolean
@@ -29,6 +31,8 @@ export interface PlanItem {
   amount: number // minor units
   categoryId?: string
   probability?: number // 0–100 for income
+  /** Expected day of month (1–31) — used for plan-to-date. Optional. */
+  dueDay?: number
   /** Set when generated from a recurring template; absent for one-time entries. */
   templateId?: string
   createdAt: number

@@ -33,5 +33,7 @@ export interface Transaction {
   /** transfer only */
   fromAccountId?: string
   toAccountId?: string
+  /** Linked planned item (plan-fact). Multiple transactions may share one. */
+  planItemId?: string
   createdAt: number
 }

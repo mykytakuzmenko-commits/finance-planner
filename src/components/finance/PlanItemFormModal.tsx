@@ -45,6 +45,7 @@ export function PlanItemFormModal({
   const [categoryId, setCategoryId] = useState('')
   const [recurrence, setRecurrence] = useState<PlanRecurrence>('monthly')
   const [probability, setProbability] = useState('100')
+  const [dueDay, setDueDay] = useState('')
   const [scope, setScope] = useState<PlanScope>('single')
   const [error, setError] = useState<string | null>(null)
 
@@ -57,6 +58,7 @@ export function PlanItemFormModal({
       setAmount(minorToInput(item.amount))
       setCategoryId(item.categoryId ?? '')
       setProbability(String(item.probability ?? 100))
+      setDueDay(item.dueDay ? String(item.dueDay) : '')
       setScope('single')
     } else {
       setKind(defaultKind)
@@ -65,6 +67,7 @@ export function PlanItemFormModal({
       setCategoryId('')
       setRecurrence('monthly')
       setProbability('100')
+      setDueDay('')
     }
   }, [open, item, defaultKind])
 
@@ -100,6 +103,16 @@ export function PlanItemFormModal({
       prob = Math.round(p)
     }
 
+    let due: number | undefined
+    if (dueDay.trim() !== '') {
+      const d = Number(dueDay)
+      if (!Number.isInteger(d) || d < 1 || d > 31) {
+        setError('День місяця має бути від 1 до 31.')
+        return
+      }
+      due = d
+    }
+
     if (item) {
       await updateItem(
         item,
@@ -108,6 +121,7 @@ export function PlanItemFormModal({
           amount: minor,
           categoryId: categoryId || undefined,
           probability: prob,
+          dueDay: due,
         },
         isRecurringItem ? scope : 'single',
       )
@@ -119,6 +133,7 @@ export function PlanItemFormModal({
         amount: minor,
         categoryId: categoryId || undefined,
         probability: prob,
+        dueDay: due,
         recurrence,
       })
     }
@@ -193,6 +208,15 @@ export function PlanItemFormModal({
           hint="100 — гарантований дохід. Менше — ймовірний (напр., бонус)."
         />
       )}
+
+      <TextField
+        label="День місяця (необовʼязково)"
+        inputMode="numeric"
+        placeholder="Напр., 15"
+        value={dueDay}
+        onChange={(e) => setDueDay(e.target.value)}
+        hint="Очікуваний день — для аналізу «план на сьогодні»."
+      />
 
       {!editing && (
         <SelectField

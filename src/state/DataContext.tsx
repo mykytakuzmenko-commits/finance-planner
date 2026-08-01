@@ -50,6 +50,8 @@ interface DataContextValue {
   addTransaction: (input: Omit<Transaction, 'id' | 'createdAt'>) => Promise<void>
   updateTransaction: (transaction: Transaction) => Promise<void>
   deleteTransaction: (id: string) => Promise<void>
+  /** Link (or, with undefined, unlink) a transaction to a planned item. */
+  linkTransaction: (txId: string, planItemId: string | undefined) => Promise<void>
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -205,6 +207,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setTransactions((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
+  const linkTransaction = useCallback(
+    async (txId: string, planItemId: string | undefined) => {
+      setTransactions((prev) => {
+        const tx = prev.find((t) => t.id === txId)
+        if (!tx) return prev
+        const updated = { ...tx, planItemId }
+        void putRecord(STORES.transactions, updated)
+        return prev.map((t) => (t.id === txId ? updated : t))
+      })
+    },
+    [],
+  )
+
   // ---- Derived ----
   const balances = useMemo(
     () => computeAccountBalances(accounts, transactions),
@@ -239,6 +254,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addTransaction,
       updateTransaction,
       deleteTransaction,
+      linkTransaction,
     }),
     [
       loading,
@@ -258,6 +274,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addTransaction,
       updateTransaction,
       deleteTransaction,
+      linkTransaction,
     ],
   )
 

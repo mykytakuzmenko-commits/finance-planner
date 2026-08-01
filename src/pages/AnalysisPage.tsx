@@ -1,12 +1,215 @@
+import { useEffect, useMemo, useState } from 'react'
+import { usePlanning } from '../state/PlanningContext'
+import { useData } from '../state/DataContext'
+import { useSettings } from '../state/SettingsContext'
+import { currentMonth } from '../utils/month'
+import { todayISO } from '../utils/date'
+import { formatMoney } from '../utils/money'
+import { buildPlanFact } from '../calculations/planFact'
 import { EmptyState } from '../components/ui/EmptyState'
+import { Button } from '../components/ui/Button'
+import { MonthSwitcher } from '../components/finance/MonthSwitcher'
+import { StatusBadge } from '../components/finance/StatusBadge'
+import { PlanItemLinkModal } from '../components/finance/PlanItemLinkModal'
+import type { PlanItem } from '../types/planning'
 
 export function AnalysisPage() {
+  const { loading: planLoading, itemsForMonth, ensureMonth } = usePlanning()
+  const { loading: dataLoading, transactions, categories, accounts } = useData()
+  const { settings } = useSettings()
+  const currency = settings.baseCurrency
+  const loading = planLoading || dataLoading
+
+  const [month, setMonth] = useState(currentMonth())
+  const [linkItem, setLinkItem] = useState<PlanItem | null>(null)
+
+  useEffect(() => {
+    if (!planLoading) void ensureMonth(month)
+  }, [month, planLoading, ensureMonth])
+
+  const planItems = itemsForMonth(month)
+  const fact = useMemo(
+    () => buildPlanFact(month, planItems, transactions, categories, todayISO()),
+    [month, planItems, transactions, categories],
+  )
+
+  const accountName = useMemo(() => {
+    const map = new Map(accounts.map((a) => [a.id, a.name]))
+    return (id?: string) => (id ? map.get(id) ?? '—' : '—')
+  }, [accounts])
+  const categoryName = useMemo(() => {
+    const map = new Map(categories.map((c) => [c.id, c.name]))
+    return (id?: string) => (id ? map.get(id) ?? 'Без категорії' : 'Без категорії')
+  }, [categories])
+
+  const money = (m: number) => formatMoney(m, currency)
+  const signed = (m: number) => `${m > 0 ? '+' : m < 0 ? '−' : ''}${money(Math.abs(m))}`
+  const devClass = (m: number) =>
+    m > 0 ? 'dev dev--pos' : m < 0 ? 'dev dev--neg' : 'dev'
+
+  if (loading) return <div className="page__loading">Завантаження…</div>
+
+  const nothingToShow =
+    planItems.length === 0 && fact.actualIncome === 0 && fact.actualExpense === 0
+
   return (
     <div className="page">
-      <EmptyState
-        icon="analysis"
-        title="Даних для аналітики поки немає"
-        description="План-факт аналіз, відхилення за доходами й витратами та розбивка за категоріями зʼявляться на етапі Milestone 4."
+      <MonthSwitcher month={month} onChange={setMonth} />
+
+      {nothingToShow ? (
+        <EmptyState
+          icon="analysis"
+          title="Немає даних для аналізу"
+          description="Додайте план на цей місяць (розділ «Планування») та фактичні операції (розділ «Операції») — і тут зʼявиться порівняння план/факт."
+        />
+      ) : (
+        <>
+          {/* Overall plan vs fact */}
+          <section className="section">
+            <h2 className="section__title">Загалом за місяць</h2>
+            <div className="compare-grid">
+              <div className="compare">
+                <span className="compare__label">Доходи</span>
+                <div className="compare__nums">
+                  <span>план {money(fact.plannedIncome)}</span>
+                  <span>факт {money(fact.actualIncome)}</span>
+                </div>
+                <span className={devClass(fact.incomeDeviation)}>
+                  Відхилення: {signed(fact.incomeDeviation)}
+                </span>
+              </div>
+              <div className="compare">
+                <span className="compare__label">Витрати</span>
+                <div className="compare__nums">
+                  <span>план {money(fact.plannedExpense)}</span>
+                  <span>факт {money(fact.actualExpense)}</span>
+                </div>
+                <span className={devClass(fact.expenseDeviation)}>
+                  {fact.expenseDeviation >= 0 ? 'Економія: ' : 'Перевитрата: '}
+                  {signed(fact.expenseDeviation)}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Plan-to-date vs actual-to-date */}
+          <section className="section">
+            <h2 className="section__title">На сьогодні</h2>
+            <p className="section__hint">
+              Скільки мало статися до сьогодні за планом — і скільки фактично сталося.
+            </p>
+            <div className="compare-grid">
+              <div className="compare">
+                <span className="compare__label">Доходи (до сьогодні)</span>
+                <div className="compare__nums">
+                  <span>план {money(fact.plannedIncomeToDate)}</span>
+                  <span>факт {money(fact.actualIncomeToDate)}</span>
+                </div>
+              </div>
+              <div className="compare">
+                <span className="compare__label">Витрати (до сьогодні)</span>
+                <div className="compare__nums">
+                  <span>план {money(fact.plannedExpenseToDate)}</span>
+                  <span>факт {money(fact.actualExpenseToDate)}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Category breakdown */}
+          {fact.categories.length > 0 && (
+            <section className="section">
+              <h2 className="section__title">За категоріями</h2>
+              <ul className="cat-fact-list">
+                {fact.categories.map((c) => (
+                  <li key={c.key} className="cat-fact">
+                    <div className="cat-fact__head">
+                      <span className="cat-fact__name">
+                        {c.categoryName}
+                        <span className="cat-fact__kind">
+                          {c.kind === 'income' ? 'дохід' : 'витрата'}
+                        </span>
+                      </span>
+                      <StatusBadge status={c.status} />
+                    </div>
+                    <div className="cat-fact__nums">
+                      <span>план {money(c.planned)}</span>
+                      <span>факт {money(c.actual)}</span>
+                      <span className={devClass(c.deviation)}>{signed(c.deviation)}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Plan item fulfilment / linking */}
+          {planItems.length > 0 && (
+            <section className="section">
+              <h2 className="section__title">Планові позиції: план і факт</h2>
+              <p className="section__hint">
+                Привʼяжіть фактичні операції до планових позицій. Одна позиція може мати
+                кілька платежів (частковий факт).
+              </p>
+              <ul className="plan-fact-list">
+                {[...planItems]
+                  .map((i) => fact.items.find((f) => f.item.id === i.id)!)
+                  .map((f) => (
+                    <li key={f.item.id} className="plan-fact">
+                      <div className="plan-fact__text">
+                        <span className="plan-fact__name">
+                          {f.item.name}
+                          <StatusBadge status={f.status} />
+                        </span>
+                        <span className="plan-fact__nums">
+                          план {money(f.planned)} · факт {money(f.actual)}
+                          {f.linkedTxIds.length > 0 && ` · ${f.linkedTxIds.length} оп.`}
+                        </span>
+                      </div>
+                      <Button variant="secondary" onClick={() => setLinkItem(f.item)}>
+                        Привʼязати
+                      </Button>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Fact without plan */}
+          {fact.unlinked.length > 0 && (
+            <section className="section">
+              <h2 className="section__title">Факт без плану</h2>
+              <p className="section__hint">
+                Операції цього місяця, не привʼязані до жодної планової позиції.
+              </p>
+              <ul className="plan-fact-list">
+                {fact.unlinked.map((t) => (
+                  <li key={t.id} className="plan-fact">
+                    <div className="plan-fact__text">
+                      <span className="plan-fact__name">{categoryName(t.categoryId)}</span>
+                      <span className="plan-fact__nums">
+                        {accountName(t.accountId)}
+                        {t.note ? ` · ${t.note}` : ''}
+                      </span>
+                    </div>
+                    <span
+                      className={`plan-fact__amount plan-fact__amount--${t.type}`}
+                    >
+                      {t.type === 'income' ? '+' : '−'}
+                      {money(t.amount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
+
+      <PlanItemLinkModal
+        open={Boolean(linkItem)}
+        item={linkItem}
+        onClose={() => setLinkItem(null)}
       />
     </div>
   )

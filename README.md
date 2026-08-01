@@ -60,7 +60,7 @@ is committed, pushed, and verified on the production URL before moving on.
 | 1 | UI foundation & onboarding | ✅ Done |
 | 2 | Accounts, categories & transactions | ✅ Done |
 | 3 | Monthly planning & recurring operations | ✅ Done |
-| 4 | Plan-fact linking & analysis | ⏳ |
+| 4 | Plan-fact linking & analysis | ✅ Done |
 | 5 | Dashboard, forecast & safe-to-spend | ⏳ |
 | 6 | Weekly budget | ⏳ |
 | 7 | Savings, emergency fund & currencies | ⏳ |

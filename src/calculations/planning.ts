@@ -26,6 +26,7 @@ export function generateItemsForMonth(
       amount: t.amount,
       categoryId: t.categoryId,
       probability: t.probability,
+      dueDay: t.dueDay,
       templateId: t.id,
       createdAt: now + i,
     }))

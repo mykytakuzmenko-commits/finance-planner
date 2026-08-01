@@ -37,6 +37,7 @@ export interface PlanItemInput {
   amount: number
   categoryId?: string
   probability?: number
+  dueDay?: number
   recurrence: PlanRecurrence
 }
 
@@ -45,6 +46,7 @@ export interface PlanItemPatch {
   amount: number
   categoryId?: string
   probability?: number
+  dueDay?: number
 }
 
 interface PlanningContextValue {
@@ -96,6 +98,7 @@ export function PlanningProvider({ children }: { children: ReactNode }) {
         amount: t.amount,
         categoryId: t.categoryId,
         probability: t.probability,
+        dueDay: t.dueDay,
         templateId: t.id,
         createdAt: now + i,
       }))
@@ -168,6 +171,7 @@ export function PlanningProvider({ children }: { children: ReactNode }) {
       amount: input.amount,
       categoryId: input.categoryId,
       probability: input.kind === 'income' ? input.probability : undefined,
+      dueDay: input.dueDay,
     }
 
     if (input.recurrence === 'once') {
@@ -185,6 +189,7 @@ export function PlanningProvider({ children }: { children: ReactNode }) {
       categoryId: input.categoryId,
       cadence: input.recurrence,
       probability: base.probability,
+      dueDay: input.dueDay,
       startMonth: input.month,
       active: true,
       createdAt: Date.now(),
@@ -236,6 +241,7 @@ export function PlanningProvider({ children }: { children: ReactNode }) {
           amount: patch.amount,
           categoryId: patch.categoryId,
           probability,
+          dueDay: patch.dueDay,
         }
         ops.push(putRecord(STORES.planTemplates, newTpl))
       }
