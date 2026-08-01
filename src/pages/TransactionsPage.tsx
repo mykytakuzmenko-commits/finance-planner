@@ -1,40 +1,93 @@
 import { useState } from 'react'
+import { useData } from '../state/DataContext'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Button } from '../components/ui/Button'
-import { Modal } from '../components/ui/Modal'
+import { Icon } from '../components/ui/Icon'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { TransactionFormModal } from '../components/finance/TransactionFormModal'
+import { TransactionList } from '../components/finance/TransactionList'
+import { CategoryManagerModal } from '../components/finance/CategoryManagerModal'
+import type { Transaction } from '../types/finance'
 
 export function TransactionsPage() {
-  const [demoOpen, setDemoOpen] = useState(false)
+  const { loading, accounts, categories, transactions, deleteTransaction } =
+    useData()
+
+  const [txModal, setTxModal] = useState(false)
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null)
+  const [deletingTx, setDeletingTx] = useState<Transaction | null>(null)
+  const [categoriesModal, setCategoriesModal] = useState(false)
+
+  const openNew = () => {
+    setEditingTx(null)
+    setTxModal(true)
+  }
+
+  if (loading) {
+    return <div className="page__loading">Завантаження…</div>
+  }
 
   return (
     <div className="page">
-      <EmptyState
-        icon="transactions"
-        title="Ще немає операцій"
-        description="Додавання доходів, витрат і переказів зʼявиться на наступному етапі (Milestone 2). Кнопка нижче демонструє базове модальне вікно."
-        action={
-          <Button onClick={() => setDemoOpen(true)}>Показати приклад форми</Button>
-        }
-      />
+      <div className="page__toolbar">
+        <Button onClick={openNew} disabled={accounts.length === 0}>
+          <Icon name="plus" size={18} /> Додати операцію
+        </Button>
+        <Button variant="secondary" onClick={() => setCategoriesModal(true)}>
+          Категорії
+        </Button>
+      </div>
 
-      <Modal
-        open={demoOpen}
-        title="Демонстрація модального вікна"
-        onClose={() => setDemoOpen(false)}
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setDemoOpen(false)}>
-              Закрити
-            </Button>
-            <Button onClick={() => setDemoOpen(false)}>Зрозуміло</Button>
-          </>
-        }
-      >
-        <p>
-          Це базовий компонент модального вікна з UI-фундаменту. У Milestone 2
-          тут буде повноцінна форма додавання транзакції.
-        </p>
-      </Modal>
+      {accounts.length === 0 ? (
+        <EmptyState
+          icon="wallet"
+          title="Спершу створіть рахунок"
+          description="Щоб додавати операції, потрібен хоча б один рахунок. Створіть його на дашборді."
+        />
+      ) : transactions.length === 0 ? (
+        <EmptyState
+          icon="transactions"
+          title="Операцій ще немає"
+          description="Додайте перший дохід, витрату або переказ між рахунками."
+          action={<Button onClick={openNew}>Додати операцію</Button>}
+        />
+      ) : (
+        <TransactionList
+          transactions={transactions}
+          accounts={accounts}
+          categories={categories}
+          onEdit={(t) => {
+            setEditingTx(t)
+            setTxModal(true)
+          }}
+          onDelete={(t) => setDeletingTx(t)}
+        />
+      )}
+
+      <TransactionFormModal
+        open={txModal}
+        transaction={editingTx}
+        onClose={() => {
+          setTxModal(false)
+          setEditingTx(null)
+        }}
+      />
+      <CategoryManagerModal
+        open={categoriesModal}
+        onClose={() => setCategoriesModal(false)}
+      />
+      <ConfirmDialog
+        open={Boolean(deletingTx)}
+        title="Видалити операцію?"
+        message="Операцію буде видалено, а баланс рахунку перераховано."
+        confirmLabel="Видалити"
+        danger
+        onCancel={() => setDeletingTx(null)}
+        onConfirm={async () => {
+          if (deletingTx) await deleteTransaction(deletingTx.id)
+          setDeletingTx(null)
+        }}
+      />
     </div>
   )
 }
