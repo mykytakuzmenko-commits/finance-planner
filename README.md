@@ -66,7 +66,9 @@ is committed, pushed, and verified on the production URL before moving on.
 | 7 | Savings, emergency fund & currencies | ✅ Done |
 | 8 | Macro data | ✅ Done |
 | 9 | Recommendation engine | ✅ Done |
-| 10 | Backup, reports & reliability | ⏳ |
+| 10 | Backup, reports & reliability | ✅ Done |
 
 Each milestone ends with a deployed build and an explicit approval gate before
 the next one begins.
+
+**All 11 milestones (0–10) are complete — the MVP is feature-complete and deployed.**

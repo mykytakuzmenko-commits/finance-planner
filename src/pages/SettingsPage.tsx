@@ -1,8 +1,17 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSettings } from '../state/SettingsContext'
 import { CURRENCIES } from '../constants/currencies'
 import type { CurrencyCode } from '../types/settings'
 import { defaultRates } from '../utils/rates'
+import {
+  BackupValidationError,
+  downloadBackup,
+  getLastBackup,
+  parseBackup,
+  restoreBackup,
+  type BackupFile,
+} from '../services/backup'
+import { formatDate } from '../utils/date'
 import { TextField } from '../components/ui/TextField'
 import { SelectField } from '../components/ui/SelectField'
 import { Button } from '../components/ui/Button'
@@ -22,7 +31,42 @@ export function SettingsPage() {
   )
   const [ratesSaved, setRatesSaved] = useState(false)
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pendingImport, setPendingImport] = useState<BackupFile | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [lastBackup, setLastBackup] = useState<string | null>(() => getLastBackup())
+
   const dirty = name !== settings.name || currency !== settings.baseCurrency
+
+  const onExport = async () => {
+    await downloadBackup()
+    setLastBackup(getLastBackup())
+  }
+
+  const onFileChosen = async (file: File | undefined) => {
+    setImportError(null)
+    if (!file) return
+    try {
+      const text = await file.text()
+      // Validate BEFORE touching data — a corrupted file cannot delete anything.
+      const backup = parseBackup(text)
+      setPendingImport(backup)
+    } catch (e) {
+      setImportError(
+        e instanceof BackupValidationError ? e.message : 'Не вдалося прочитати файл.',
+      )
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const confirmImport = async () => {
+    if (!pendingImport) return
+    await restoreBackup(pendingImport)
+    setPendingImport(null)
+    // Reload so every context rebuilds from the restored data.
+    window.location.reload()
+  }
 
   const save = () => {
     const patch: Partial<typeof settings> = { name: name.trim(), baseCurrency: currency }
@@ -99,6 +143,33 @@ export function SettingsPage() {
       </section>
 
       <section className="card">
+        <h2 className="card__title">Резервне копіювання</h2>
+        <p className="card__text">
+          Експортуйте всі дані у файл, щоб зберегти копію чи перенести на інший пристрій.
+          Імпорт замінює поточні дані даними з файлу.
+        </p>
+        <div className="card__actions" style={{ flexWrap: 'wrap' }}>
+          <Button onClick={onExport}>Експортувати дані</Button>
+          <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+            Імпортувати з файлу
+          </Button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(e) => void onFileChosen(e.target.files?.[0])}
+        />
+        <p className="card__meta">
+          {lastBackup
+            ? `Останнє резервне копіювання: ${formatDate(lastBackup.slice(0, 10))}`
+            : 'Резервних копій ще не було.'}
+        </p>
+        {importError && <p className="form-error">{importError}</p>}
+      </section>
+
+      <section className="card">
         <h2 className="card__title">Дані</h2>
         <p className="card__text">
           Усі дані зберігаються локально у вашому браузері. Ви можете скинути
@@ -108,6 +179,28 @@ export function SettingsPage() {
           Скинути та почати заново
         </Button>
       </section>
+
+      <Modal
+        open={Boolean(pendingImport)}
+        title="Відновити з резервної копії?"
+        onClose={() => setPendingImport(null)}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setPendingImport(null)}>
+              Скасувати
+            </Button>
+            <Button variant="danger" onClick={confirmImport}>
+              Замінити дані
+            </Button>
+          </>
+        }
+      >
+        <p>
+          Усі поточні дані буде замінено даними з файлу
+          {pendingImport ? ` (від ${formatDate(pendingImport.exportedAt.slice(0, 10))})` : ''}. Цю
+          дію не можна скасувати.
+        </p>
+      </Modal>
 
       <Modal
         open={confirmReset}

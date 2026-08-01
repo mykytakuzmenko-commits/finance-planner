@@ -9,10 +9,12 @@ import { PlanningProvider } from './state/PlanningContext'
 import { WeeklyBudgetProvider } from './state/WeeklyBudgetContext'
 import { SavingsGoalsProvider } from './state/SavingsGoalsContext'
 import { MacroProvider } from './state/MacroContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SettingsProvider>
+    <ErrorBoundary>
+      <SettingsProvider>
       <DataProvider>
         <PlanningProvider>
           <WeeklyBudgetProvider>
@@ -26,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
           </WeeklyBudgetProvider>
         </PlanningProvider>
       </DataProvider>
-    </SettingsProvider>
+      </SettingsProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

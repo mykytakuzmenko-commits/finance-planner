@@ -94,3 +94,12 @@ export async function bulkDelete(store: StoreName, ids: string[]): Promise<void>
     t.onerror = () => reject(t.error)
   })
 }
+
+export async function clearStore(store: StoreName): Promise<void> {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const req = tx(db, store, 'readwrite').clear()
+    req.onsuccess = () => resolve()
+    req.onerror = () => reject(req.error)
+  })
+}

@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { usePlanning } from '../state/PlanningContext'
 import { useData } from '../state/DataContext'
 import { useSettings } from '../state/SettingsContext'
-import { currentMonth } from '../utils/month'
+import { currentMonth, formatMonth } from '../utils/month'
 import { todayISO } from '../utils/date'
 import { formatMoney } from '../utils/money'
 import { buildPlanFact } from '../calculations/planFact'
+import { closeMonth, getReport, reopenMonth, type MonthReport } from '../services/reports'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Button } from '../components/ui/Button'
 import { MonthSwitcher } from '../components/finance/MonthSwitcher'
@@ -22,9 +23,11 @@ export function AnalysisPage() {
 
   const [month, setMonth] = useState(currentMonth())
   const [linkItem, setLinkItem] = useState<PlanItem | null>(null)
+  const [closed, setClosed] = useState<MonthReport | null>(() => getReport(currentMonth()))
 
   useEffect(() => {
     if (!planLoading) void ensureMonth(month)
+    setClosed(getReport(month))
   }, [month, planLoading, ensureMonth])
 
   const planItems = itemsForMonth(month)
@@ -47,6 +50,54 @@ export function AnalysisPage() {
   const devClass = (m: number) =>
     m > 0 ? 'dev dev--pos' : m < 0 ? 'dev dev--neg' : 'dev'
 
+  const buildReport = (): MonthReport => ({
+    month,
+    plannedIncome: fact.plannedIncome,
+    actualIncome: fact.actualIncome,
+    plannedExpense: fact.plannedExpense,
+    actualExpense: fact.actualExpense,
+    actualSavings: fact.actualIncome - fact.actualExpense,
+    topCategories: fact.categories
+      .filter((c) => c.kind === 'expense')
+      .sort((a, b) => b.actual - a.actual)
+      .slice(0, 3)
+      .map((c) => ({ name: c.categoryName, actual: c.actual })),
+    closedAt: new Date().toISOString(),
+  })
+
+  const downloadReport = () => {
+    const r = buildReport()
+    const text = [
+      `Звіт за ${formatMonth(month)}`,
+      '',
+      `Доходи:   план ${money(r.plannedIncome)} · факт ${money(r.actualIncome)}`,
+      `Витрати:  план ${money(r.plannedExpense)} · факт ${money(r.actualExpense)}`,
+      `Заощадження (факт): ${money(r.actualSavings)}`,
+      '',
+      'Топ витрат за категоріями:',
+      ...r.topCategories.map((c) => `  • ${c.name}: ${money(c.actual)}`),
+    ].join('\n')
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `report-${month}.txt`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const onCloseMonth = () => {
+    const r = buildReport()
+    closeMonth(r)
+    setClosed(r)
+  }
+  const onReopenMonth = () => {
+    reopenMonth(month)
+    setClosed(null)
+  }
+
   if (loading) return <div className="page__loading">Завантаження…</div>
 
   const nothingToShow =
@@ -64,6 +115,31 @@ export function AnalysisPage() {
         />
       ) : (
         <>
+          {/* Monthly report & closing */}
+          <section className="section">
+            <div className="section__head">
+              <h2 className="section__title">Звіт за місяць</h2>
+              {closed && <span className="report-closed">Місяць закрито</span>}
+            </div>
+            <div className="report-actions">
+              <Button variant="secondary" onClick={downloadReport}>
+                Завантажити звіт (.txt)
+              </Button>
+              {closed ? (
+                <Button variant="ghost" onClick={onReopenMonth}>
+                  Відкрити місяць
+                </Button>
+              ) : (
+                <Button onClick={onCloseMonth}>Закрити місяць</Button>
+              )}
+            </div>
+            {closed && (
+              <p className="section__hint">
+                Підсумок збережено. Заощадження за місяць: {money(closed.actualSavings)}.
+              </p>
+            )}
+          </section>
+
           {/* Overall plan vs fact */}
           <section className="section">
             <h2 className="section__title">Загалом за місяць</h2>

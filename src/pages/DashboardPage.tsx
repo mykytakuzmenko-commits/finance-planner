@@ -20,6 +20,8 @@ import { CashFlowBar } from '../components/finance/CashFlowBar'
 import { ForecastPanel } from '../components/finance/ForecastPanel'
 import { RecommendationsPanel } from '../components/finance/RecommendationsPanel'
 import { useRecommendations } from '../hooks/useRecommendations'
+import { getLastBackup } from '../services/backup'
+import { Link } from '../router/Router'
 import type { Account, Transaction } from '../types/finance'
 import type { PlanItem } from '../types/planning'
 
@@ -115,6 +117,17 @@ export function DashboardPage() {
 
   const recommendations = useRecommendations()
 
+  const [backupSnoozed, setBackupSnoozed] = useState(
+    () => sessionStorage.getItem('pfp.backupSnooze') === '1',
+  )
+  const backupOverdue = useMemo(() => {
+    if (backupSnoozed) return false
+    const last = getLastBackup()
+    if (!last) return true
+    const age = Date.now() - new Date(last).getTime()
+    return !Number.isFinite(age) || age > 14 * 86400000
+  }, [backupSnoozed])
+
   if (loading) return <div className="page__loading">Завантаження…</div>
 
   if (accounts.length === 0) {
@@ -140,6 +153,28 @@ export function DashboardPage() {
   return (
     <div className="page">
       <p className="dash-month">{formatMonth(month)}</p>
+
+      {/* Backup reminder */}
+      {backupOverdue && (
+        <div className="alert alert--warning backup-reminder">
+          <span>Давно не робили резервну копію — експортуйте дані, щоб не втратити їх.</span>
+          <span className="report-actions">
+            <Link to="/settings" className="btn btn--secondary">
+              До налаштувань
+            </Link>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => {
+                sessionStorage.setItem('pfp.backupSnooze', '1')
+                setBackupSnoozed(true)
+              }}
+            >
+              Пізніше
+            </button>
+          </span>
+        </div>
+      )}
 
       {/* Alerts */}
       {forecast.deficit > 0 && (
