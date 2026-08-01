@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useSettings } from '../state/SettingsContext'
+import { useAuth } from '../state/AuthContext'
 import { CURRENCIES } from '../constants/currencies'
 import type { CurrencyCode } from '../types/settings'
 import { defaultRates } from '../utils/rates'
@@ -19,6 +20,7 @@ import { Modal } from '../components/ui/Modal'
 
 export function SettingsPage() {
   const { settings, updateSettings, resetSettings } = useSettings()
+  const { session, signOut } = useAuth()
   const [name, setName] = useState(settings.name)
   const [currency, setCurrency] = useState<CurrencyCode>(settings.baseCurrency)
   const [saved, setSaved] = useState(false)
@@ -170,13 +172,24 @@ export function SettingsPage() {
       </section>
 
       <section className="card">
+        <h2 className="card__title">Акаунт</h2>
+        <p className="card__text">
+          Ви увійшли як <strong>{session?.user.email}</strong>. Дані синхронізуються між
+          вашими пристроями.
+        </p>
+        <Button variant="secondary" onClick={() => void signOut()}>
+          Вийти
+        </Button>
+      </section>
+
+      <section className="card">
         <h2 className="card__title">Дані</h2>
         <p className="card__text">
-          Усі дані зберігаються локально у вашому браузері. Ви можете скинути
-          онбординг і почати з початку.
+          Скинути онбординг і повернути налаштування до початкових (дані рахунків
+          залишаться).
         </p>
         <Button variant="danger" onClick={() => setConfirmReset(true)}>
-          Скинути та почати заново
+          Скинути налаштування
         </Button>
       </section>
 

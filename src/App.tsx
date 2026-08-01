@@ -29,9 +29,12 @@ const ROUTES: Record<string, RouteDef> = {
 }
 
 function App() {
-  const { settings } = useSettings()
+  const { settings, loading } = useSettings()
   const { path } = useRouter()
 
+  if (loading) {
+    return <div className="app-loader">Завантаження…</div>
+  }
   if (!settings.onboarded) {
     return <OnboardingPage />
   }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSettings } from '../state/SettingsContext'
 import { CURRENCIES } from '../constants/currencies'
 import type { CurrencyCode } from '../types/settings'
+import { defaultRates } from '../utils/rates'
 import { Button } from '../components/ui/Button'
 import { TextField } from '../components/ui/TextField'
 import { Icon } from '../components/ui/Icon'
@@ -19,6 +20,7 @@ export function OnboardingPage() {
       onboarded: true,
       name: name.trim(),
       baseCurrency: currency,
+      exchangeRates: defaultRates(currency),
     })
   }
 

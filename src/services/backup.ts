@@ -91,7 +91,7 @@ export function parseBackup(text: string): BackupFile {
 export async function restoreBackup(backup: BackupFile): Promise<void> {
   for (const name of STORE_NAMES) {
     await clearStore(name)
-    await bulkPut(name, backup.data[name])
+    await bulkPut(name, backup.data[name] as object[])
   }
   if (backup.settings && typeof backup.settings === 'object') {
     try {
