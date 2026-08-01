@@ -63,7 +63,7 @@ is committed, pushed, and verified on the production URL before moving on.
 | 4 | Plan-fact linking & analysis | ✅ Done |
 | 5 | Dashboard, forecast & safe-to-spend | ✅ Done |
 | 6 | Weekly budget | ✅ Done |
-| 7 | Savings, emergency fund & currencies | ⏳ |
+| 7 | Savings, emergency fund & currencies | ✅ Done |
 | 8 | Macro data | ⏳ |
 | 9 | Recommendation engine | ⏳ |
 | 10 | Backup, reports & reliability | ⏳ |

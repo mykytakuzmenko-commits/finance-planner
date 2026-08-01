@@ -8,6 +8,7 @@ import { TransactionsPage } from './pages/TransactionsPage'
 import { PlanningPage } from './pages/PlanningPage'
 import { WeeklyPage } from './pages/WeeklyPage'
 import { AnalysisPage } from './pages/AnalysisPage'
+import { SavingsPage } from './pages/SavingsPage'
 import { SettingsPage } from './pages/SettingsPage'
 
 interface RouteDef {
@@ -21,6 +22,7 @@ const ROUTES: Record<string, RouteDef> = {
   '/planning': { title: 'Планування', element: <PlanningPage /> },
   '/weekly': { title: 'Тижневий бюджет', element: <WeeklyPage /> },
   '/analysis': { title: 'Аналітика', element: <AnalysisPage /> },
+  '/savings': { title: 'Заощадження', element: <SavingsPage /> },
   '/settings': { title: 'Налаштування', element: <SettingsPage /> },
 }
 

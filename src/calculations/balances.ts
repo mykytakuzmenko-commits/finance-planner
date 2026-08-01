@@ -24,7 +24,8 @@ export function computeAccountBalances(
       add(t.accountId, -t.amount)
     } else if (t.type === 'transfer') {
       add(t.fromAccountId, -t.amount)
-      add(t.toAccountId, t.amount)
+      // Destination is credited toAmount for cross-currency transfers, else amount.
+      add(t.toAccountId, t.toAmount ?? t.amount)
     }
   }
   return balances

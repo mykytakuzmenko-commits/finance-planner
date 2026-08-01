@@ -6,7 +6,8 @@ import { SelectField } from '../ui/SelectField'
 import { useData } from '../../state/DataContext'
 import { useSettings } from '../../state/SettingsContext'
 import type { Transaction, TransactionType } from '../../types/finance'
-import { minorToInput, parseAmount } from '../../utils/money'
+import { formatMoney, minorToInput, parseAmount } from '../../utils/money'
+import { convert } from '../../utils/rates'
 import { todayISO } from '../../utils/date'
 
 interface TransactionFormModalProps {
@@ -37,6 +38,7 @@ export function TransactionFormModal({
   const [accountId, setAccountId] = useState('')
   const [toAccountId, setToAccountId] = useState('')
   const [categoryId, setCategoryId] = useState('')
+  const [toAmount, setToAmount] = useState('')
   const [date, setDate] = useState(todayISO())
   const [note, setNote] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -52,6 +54,7 @@ export function TransactionFormModal({
     setDate(t?.date ?? todayISO())
     setNote(t?.note ?? '')
     setError(null)
+    setToAmount(t?.toAmount ? minorToInput(t.toAmount) : '')
     if (t?.type === 'transfer') {
       setAccountId(t.fromAccountId ?? '')
       setToAccountId(t.toAccountId ?? '')
@@ -62,6 +65,15 @@ export function TransactionFormModal({
       setCategoryId(t?.categoryId ?? '')
     }
   }, [open, transaction, defaultType, accounts])
+
+  const fromAcc = accounts.find((a) => a.id === accountId)
+  const toAcc = accounts.find((a) => a.id === toAccountId)
+  const crossCurrency =
+    type === 'transfer' && !!fromAcc && !!toAcc && fromAcc.currency !== toAcc.currency
+  const suggestedTo =
+    crossCurrency && parseAmount(amount) !== null
+      ? convert(parseAmount(amount)!, fromAcc!.currency, toAcc!.currency, settings.exchangeRates)
+      : null
 
   const relevantCategories = useMemo(
     () => categories.filter((c) => c.kind === (type === 'income' ? 'income' : 'expense')),
@@ -113,9 +125,14 @@ export function TransactionFormModal({
       note: note.trim() || undefined,
     }
 
+    let toAmt: number | undefined
+    if (type === 'transfer' && crossCurrency) {
+      toAmt = parseAmount(toAmount) ?? suggestedTo ?? undefined
+    }
+
     let payload: Omit<Transaction, 'id' | 'createdAt'>
     if (type === 'transfer') {
-      payload = { ...base, fromAccountId: accountId, toAccountId }
+      payload = { ...base, fromAccountId: accountId, toAccountId, toAmount: toAmt }
     } else {
       payload = { ...base, accountId, categoryId: categoryId || undefined }
     }
@@ -129,6 +146,7 @@ export function TransactionFormModal({
         categoryId: type === 'transfer' ? undefined : categoryId || undefined,
         fromAccountId: type === 'transfer' ? accountId : undefined,
         toAccountId: type === 'transfer' ? toAccountId : undefined,
+        toAmount: type === 'transfer' ? toAmt : undefined,
       })
     } else {
       await addTransaction(payload)
@@ -184,7 +202,7 @@ export function TransactionFormModal({
       ) : (
         <>
           <TextField
-            label={`Сума (${settings.baseCurrency})`}
+            label={`Сума (${fromAcc?.currency ?? settings.baseCurrency})`}
             inputMode="decimal"
             placeholder="0.00"
             value={amount}
@@ -206,6 +224,20 @@ export function TransactionFormModal({
                 onChange={(e) => setToAccountId(e.target.value)}
                 options={accountOptions}
               />
+              {crossCurrency && (
+                <TextField
+                  label={`Сума зарахування (${toAcc!.currency})`}
+                  inputMode="decimal"
+                  placeholder={suggestedTo !== null ? minorToInput(suggestedTo) : '0.00'}
+                  value={toAmount}
+                  onChange={(e) => setToAmount(e.target.value)}
+                  hint={
+                    suggestedTo !== null
+                      ? `За курсом ≈ ${formatMoney(suggestedTo, toAcc!.currency)}. Змініть за потреби.`
+                      : 'Скільки буде зараховано в валюті призначення.'
+                  }
+                />
+              )}
             </>
           ) : (
             <>

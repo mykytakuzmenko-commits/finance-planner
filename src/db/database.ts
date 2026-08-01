@@ -1,5 +1,5 @@
 const DB_NAME = 'pfp'
-const DB_VERSION = 3
+const DB_VERSION = 4
 
 export const STORES = {
   accounts: 'accounts',
@@ -9,6 +9,7 @@ export const STORES = {
   planItems: 'planItems',
   planMonths: 'planMonths',
   weeklyBudgets: 'weeklyBudgets',
+  savingsGoals: 'savingsGoals',
 } as const
 
 export type StoreName = (typeof STORES)[keyof typeof STORES]

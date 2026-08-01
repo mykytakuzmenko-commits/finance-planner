@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { TextField } from '../ui/TextField'
+import { SelectField } from '../ui/SelectField'
 import { useData } from '../../state/DataContext'
 import { useSettings } from '../../state/SettingsContext'
 import type { Account } from '../../types/finance'
+import type { CurrencyCode } from '../../types/settings'
+import { CURRENCIES } from '../../constants/currencies'
 import { minorToInput, parseAmount } from '../../utils/money'
 
 interface AccountFormModalProps {
@@ -18,6 +21,8 @@ export function AccountFormModal({ open, account, onClose }: AccountFormModalPro
   const { settings } = useSettings()
   const [name, setName] = useState('')
   const [balance, setBalance] = useState('0.00')
+  const [currency, setCurrency] = useState<CurrencyCode>(settings.baseCurrency)
+  const [isSavings, setIsSavings] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const editing = Boolean(account)
@@ -26,8 +31,10 @@ export function AccountFormModal({ open, account, onClose }: AccountFormModalPro
     if (!open) return
     setName(account?.name ?? '')
     setBalance(account ? minorToInput(account.initialBalance) : '0.00')
+    setCurrency(account?.currency ?? settings.baseCurrency)
+    setIsSavings(account?.isSavings ?? false)
     setError(null)
-  }, [open, account])
+  }, [open, account, settings.baseCurrency])
 
   const submit = async () => {
     const trimmed = name.trim()
@@ -35,7 +42,6 @@ export function AccountFormModal({ open, account, onClose }: AccountFormModalPro
       setError('Вкажіть назву рахунку.')
       return
     }
-    // Initial balance may be zero, so parse leniently (allow "0").
     const parsed = balance.trim() === '' ? 0 : parseAmount(balance) ?? NaN
     const initialBalance = balance.trim() === '' || balance.trim() === '0' ? 0 : parsed
     if (Number.isNaN(initialBalance)) {
@@ -44,13 +50,9 @@ export function AccountFormModal({ open, account, onClose }: AccountFormModalPro
     }
 
     if (account) {
-      await updateAccount({ ...account, name: trimmed, initialBalance })
+      await updateAccount({ ...account, name: trimmed, initialBalance, currency, isSavings })
     } else {
-      await addAccount({
-        name: trimmed,
-        initialBalance,
-        currency: settings.baseCurrency,
-      })
+      await addAccount({ name: trimmed, initialBalance, currency, isSavings })
     }
     onClose()
   }
@@ -77,14 +79,31 @@ export function AccountFormModal({ open, account, onClose }: AccountFormModalPro
         autoFocus
         onChange={(e) => setName(e.target.value)}
       />
+      <SelectField
+        label="Валюта"
+        value={currency}
+        onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+        options={CURRENCIES.map((c) => ({
+          value: c.code,
+          label: `${c.symbol} ${c.code} — ${c.label}`,
+        }))}
+      />
       <TextField
-        label={`Початковий баланс (${settings.baseCurrency})`}
+        label={`Початковий баланс (${currency})`}
         inputMode="decimal"
         placeholder="0.00"
         value={balance}
         onChange={(e) => setBalance(e.target.value)}
         hint="Скільки грошей на рахунку зараз."
       />
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={isSavings}
+          onChange={(e) => setIsSavings(e.target.checked)}
+        />
+        <span>Ощадний рахунок (враховується у заощадженнях і подушці)</span>
+      </label>
       {error && <p className="form-error">{error}</p>}
     </Modal>
   )

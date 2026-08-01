@@ -58,14 +58,21 @@ export function AppShell({ title, children }: AppShellProps) {
           </span>
           <h1 className="shell__title">{title}</h1>
           <span className="shell__topbar-currency">{currency.code}</span>
+          <Link
+            to="/settings"
+            className="shell__topbar-settings"
+            aria-label="Налаштування"
+          >
+            <Icon name="settings" size={20} />
+          </Link>
         </header>
 
         <main className="shell__content">{children}</main>
       </div>
 
-      {/* Mobile bottom navigation */}
+      {/* Mobile bottom navigation (settings lives in the top bar to keep this compact) */}
       <nav className="shell__mobilenav" aria-label="Основна навігація">
-        {NAV_ITEMS.map((item) => (
+        {NAV_ITEMS.filter((item) => item.path !== '/settings').map((item) => (
           <Link
             key={item.path}
             to={item.path}

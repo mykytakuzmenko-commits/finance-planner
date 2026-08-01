@@ -38,6 +38,11 @@ export function TransactionList({
     return (id?: string) => (id ? map.get(id) ?? 'Без категорії' : 'Без категорії')
   }, [categories])
 
+  const accountCurrency = useMemo(() => {
+    const map = new Map(accounts.map((a) => [a.id, a.currency]))
+    return (id?: string) => (id ? map.get(id) ?? settings.baseCurrency : settings.baseCurrency)
+  }, [accounts, settings.baseCurrency])
+
   const sorted = useMemo(
     () =>
       [...transactions].sort(
@@ -77,7 +82,7 @@ export function TransactionList({
               </span>
               <span className={`tx-row__amount tx-row__amount--${t.type}`}>
                 {sign}
-                {formatMoney(t.amount, settings.baseCurrency)}
+                {formatMoney(t.amount, accountCurrency(isTransfer ? t.fromAccountId : t.accountId))}
               </span>
             </button>
             <button

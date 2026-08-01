@@ -7,6 +7,7 @@ import { SettingsProvider } from './state/SettingsContext'
 import { DataProvider } from './state/DataContext'
 import { PlanningProvider } from './state/PlanningContext'
 import { WeeklyBudgetProvider } from './state/WeeklyBudgetContext'
+import { SavingsGoalsProvider } from './state/SavingsGoalsContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -14,9 +15,11 @@ createRoot(document.getElementById('root')!).render(
       <DataProvider>
         <PlanningProvider>
           <WeeklyBudgetProvider>
-            <RouterProvider>
-              <App />
-            </RouterProvider>
+            <SavingsGoalsProvider>
+              <RouterProvider>
+                <App />
+              </RouterProvider>
+            </SavingsGoalsProvider>
           </WeeklyBudgetProvider>
         </PlanningProvider>
       </DataProvider>

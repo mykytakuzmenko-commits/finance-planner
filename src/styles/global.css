@@ -1569,3 +1569,131 @@ h3 {
     gap: 8px;
   }
 }
+
+/* ---------- Milestone 7: savings & currencies ---------- */
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-top: 4px;
+}
+.checkbox-row input {
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.shell__topbar-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.alloc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.alloc__bar {
+  display: flex;
+  height: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.alloc__seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+.alloc__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.alloc__legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+.alloc__cur {
+  font-weight: 600;
+}
+.alloc__amt {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+.alloc__pct {
+  min-width: 42px;
+  text-align: right;
+  font-weight: 700;
+}
+
+.target-months {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.target-months__select {
+  width: auto;
+  padding: 7px 30px 7px 12px;
+}
+
+.goal-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.goal-progress__label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.goal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.goal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.goal-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.goal-card__name {
+  font-weight: 600;
+}
+.goal-card__actions {
+  display: flex;
+  gap: 2px;
+}
+.goal-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

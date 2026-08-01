@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSettings } from '../state/SettingsContext'
 import { CURRENCIES } from '../constants/currencies'
 import type { CurrencyCode } from '../types/settings'
+import { defaultRates } from '../utils/rates'
 import { TextField } from '../components/ui/TextField'
 import { SelectField } from '../components/ui/SelectField'
 import { Button } from '../components/ui/Button'
@@ -14,12 +15,37 @@ export function SettingsPage() {
   const [saved, setSaved] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
 
+  const [rates, setRates] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      CURRENCIES.map((c) => [c.code, String(settings.exchangeRates[c.code] ?? 1)]),
+    ),
+  )
+  const [ratesSaved, setRatesSaved] = useState(false)
+
   const dirty = name !== settings.name || currency !== settings.baseCurrency
 
   const save = () => {
-    updateSettings({ name: name.trim(), baseCurrency: currency })
+    const patch: Partial<typeof settings> = { name: name.trim(), baseCurrency: currency }
+    // Reset rates to sensible defaults when the base currency changes.
+    if (currency !== settings.baseCurrency) patch.exchangeRates = defaultRates(currency)
+    updateSettings(patch)
     setSaved(true)
     window.setTimeout(() => setSaved(false), 2000)
+  }
+
+  const saveRates = () => {
+    const next: Record<CurrencyCode, number> = { ...settings.exchangeRates }
+    for (const c of CURRENCIES) {
+      if (c.code === settings.baseCurrency) {
+        next[c.code] = 1
+        continue
+      }
+      const v = Number(rates[c.code])
+      if (Number.isFinite(v) && v > 0) next[c.code] = v
+    }
+    updateSettings({ exchangeRates: next })
+    setRatesSaved(true)
+    window.setTimeout(() => setRatesSaved(false), 2000)
   }
 
   return (
@@ -48,6 +74,27 @@ export function SettingsPage() {
             Зберегти зміни
           </Button>
           {saved && <span className="save-hint">Збережено ✓</span>}
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 className="card__title">Курси валют</h2>
+        <p className="card__text">
+          Ручні курси для перерахунку в базову валюту ({settings.baseCurrency}). Актуальні
+          ринкові курси зʼявляться в наступному етапі (макродані).
+        </p>
+        {CURRENCIES.filter((c) => c.code !== settings.baseCurrency).map((c) => (
+          <TextField
+            key={c.code}
+            label={`1 ${c.code} = ? ${settings.baseCurrency}`}
+            inputMode="decimal"
+            value={rates[c.code] ?? ''}
+            onChange={(e) => setRates((r) => ({ ...r, [c.code]: e.target.value }))}
+          />
+        ))}
+        <div className="card__actions">
+          <Button onClick={saveRates}>Зберегти курси</Button>
+          {ratesSaved && <span className="save-hint">Збережено ✓</span>}
         </div>
       </section>
 

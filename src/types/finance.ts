@@ -9,6 +9,8 @@ export interface Account {
   /** Opening balance in minor units (e.g. kopiykas/cents). */
   initialBalance: number
   currency: CurrencyCode
+  /** Marks the account as savings (counts toward savings & emergency fund). */
+  isSavings?: boolean
   createdAt: number
 }
 
@@ -33,6 +35,8 @@ export interface Transaction {
   /** transfer only */
   fromAccountId?: string
   toAccountId?: string
+  /** Transfer only: amount credited to the destination in its currency (for conversions). */
+  toAmount?: number
   /** Linked planned item (plan-fact). Multiple transactions may share one. */
   planItemId?: string
   createdAt: number

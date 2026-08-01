@@ -3,6 +3,7 @@ import { useData } from '../state/DataContext'
 import { usePlanning } from '../state/PlanningContext'
 import { useSettings } from '../state/SettingsContext'
 import { formatMoney } from '../utils/money'
+import { toBase } from '../utils/rates'
 import { currentMonth, formatMonth } from '../utils/month'
 import { todayISO } from '../utils/date'
 import { buildForecast } from '../calculations/forecast'
@@ -37,7 +38,6 @@ export function DashboardPage() {
     categories,
     transactions,
     balances,
-    totalBalance,
     deleteAccount,
     deleteTransaction,
   } = useData()
@@ -57,14 +57,33 @@ export function DashboardPage() {
     if (!planLoading) void ensureMonth(month)
   }, [planLoading, ensureMonth])
 
+  const rates = settings.exchangeRates
+  const accountCurrency = useMemo(() => {
+    const map = new Map(accounts.map((a) => [a.id, a.currency]))
+    return (id?: string) => (id ? map.get(id) ?? currency : currency)
+  }, [accounts, currency])
+
   const planItems = itemsForMonth(month)
   const monthTx = useMemo(
     () => transactions.filter((t) => t.date.startsWith(`${month}-`)),
     [transactions],
   )
+  // Convert to base currency so multi-currency accounts total correctly.
+  const currentBalanceBase = useMemo(
+    () => accounts.reduce((s, a) => s + toBase(balances.get(a.id) ?? 0, a.currency, rates), 0),
+    [accounts, balances, rates],
+  )
+  const monthTxBase = useMemo(
+    () =>
+      monthTx.map((t) => ({
+        ...t,
+        amount: toBase(t.amount, accountCurrency(t.accountId), rates),
+      })),
+    [monthTx, accountCurrency, rates],
+  )
   const forecast = useMemo(
-    () => buildForecast(totalBalance, monthTx, planItems),
-    [totalBalance, monthTx, planItems],
+    () => buildForecast(currentBalanceBase, monthTxBase, planItems),
+    [currentBalanceBase, monthTxBase, planItems],
   )
   const overspentCount = useMemo(
     () =>
