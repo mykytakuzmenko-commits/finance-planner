@@ -8,6 +8,7 @@ function App() {
         <h1>Personal Finance Planner</h1>
         <p className="init-status">Project initialized successfully</p>
         <p className="init-meta">Milestone 0 — Repository &amp; deployment</p>
+        <p className="init-build">build: {__APP_COMMIT__}</p>
       </div>
     </main>
   )
