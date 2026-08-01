@@ -18,6 +18,8 @@ import { TransactionFormModal } from '../components/finance/TransactionFormModal
 import { TransactionList } from '../components/finance/TransactionList'
 import { CashFlowBar } from '../components/finance/CashFlowBar'
 import { ForecastPanel } from '../components/finance/ForecastPanel'
+import { RecommendationsPanel } from '../components/finance/RecommendationsPanel'
+import { useRecommendations } from '../hooks/useRecommendations'
 import type { Account, Transaction } from '../types/finance'
 import type { PlanItem } from '../types/planning'
 
@@ -111,6 +113,8 @@ export function DashboardPage() {
     [transactions],
   )
 
+  const recommendations = useRecommendations()
+
   if (loading) return <div className="page__loading">Завантаження…</div>
 
   if (accounts.length === 0) {
@@ -182,6 +186,9 @@ export function DashboardPage() {
           <Icon name="plus" size={18} /> Додати операцію
         </Button>
       </div>
+
+      {/* Recommendations */}
+      <RecommendationsPanel recommendations={recommendations} />
 
       {/* Forecast */}
       <section className="section">

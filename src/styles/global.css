@@ -1775,3 +1775,92 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Milestone 9: recommendations ---------- */
+.reco-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.reco {
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.reco--cashflow {
+  border-left-color: var(--danger);
+}
+.reco--budget {
+  border-left-color: #fbbf24;
+}
+.reco--savings {
+  border-left-color: var(--accent);
+}
+.reco--currency {
+  border-left-color: #a78bfa;
+}
+.reco--positive {
+  border-left-color: #38bdf8;
+}
+.reco__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.reco__title {
+  font-weight: 700;
+}
+.reco__reason {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.reco__action {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.reco__amount {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.reco__amount strong {
+  color: var(--text);
+}
+.reco__disclaimer {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.conf-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.conf-badge--high {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.conf-badge--medium {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.14);
+}
+.conf-badge--low {
+  color: var(--text-muted);
+  background: var(--bg-hover);
+}

@@ -65,7 +65,7 @@ is committed, pushed, and verified on the production URL before moving on.
 | 6 | Weekly budget | ✅ Done |
 | 7 | Savings, emergency fund & currencies | ✅ Done |
 | 8 | Macro data | ✅ Done |
-| 9 | Recommendation engine | ⏳ |
+| 9 | Recommendation engine | ✅ Done |
 | 10 | Backup, reports & reliability | ⏳ |
 
 Each milestone ends with a deployed build and an explicit approval gate before
