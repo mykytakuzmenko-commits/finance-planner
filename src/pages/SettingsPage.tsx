@@ -147,8 +147,8 @@ export function SettingsPage() {
       <section className="card">
         <h2 className="card__title">Резервне копіювання</h2>
         <p className="card__text">
-          Експортуйте всі дані у файл, щоб зберегти копію чи перенести на інший пристрій.
-          Імпорт замінює поточні дані даними з файлу.
+          Дані зберігаються у вашому акаунті (хмара). Ви також можете експортувати їх у
+          файл про запас; імпорт замінює поточні дані даними з файлу.
         </p>
         <div className="card__actions" style={{ flexWrap: 'wrap' }}>
           <Button onClick={onExport}>Експортувати дані</Button>

@@ -80,7 +80,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const persist = useCallback(
     (next: UserSettings) => {
       if (!userId) return
-      void supabase.from('profiles').update(settingsToRow(next)).eq('id', userId)
+      // Upsert so it works whether or not the profile row already exists.
+      void supabase
+        .from('profiles')
+        .upsert({ id: userId, ...settingsToRow(next) })
+        .then(({ error }) => {
+          if (error) console.error('profile save failed', error)
+        })
     },
     [userId],
   )
