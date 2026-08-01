@@ -1,17 +1,38 @@
+import type { ReactNode } from 'react'
+import { useRouter } from './router/Router'
+import { useSettings } from './state/SettingsContext'
+import { AppShell } from './components/layout/AppShell'
+import { OnboardingPage } from './pages/OnboardingPage'
+import { DashboardPage } from './pages/DashboardPage'
+import { TransactionsPage } from './pages/TransactionsPage'
+import { PlanningPage } from './pages/PlanningPage'
+import { AnalysisPage } from './pages/AnalysisPage'
+import { SettingsPage } from './pages/SettingsPage'
+
+interface RouteDef {
+  title: string
+  element: ReactNode
+}
+
+const ROUTES: Record<string, RouteDef> = {
+  '/': { title: 'Дашборд', element: <DashboardPage /> },
+  '/transactions': { title: 'Операції', element: <TransactionsPage /> },
+  '/planning': { title: 'Планування', element: <PlanningPage /> },
+  '/analysis': { title: 'Аналітика', element: <AnalysisPage /> },
+  '/settings': { title: 'Налаштування', element: <SettingsPage /> },
+}
+
 function App() {
-  return (
-    <main className="init-screen">
-      <div className="init-card">
-        <div className="init-badge" aria-hidden="true">
-          ₴
-        </div>
-        <h1>Personal Finance Planner</h1>
-        <p className="init-status">Project initialized successfully</p>
-        <p className="init-meta">Milestone 0 — Repository &amp; deployment</p>
-        <p className="init-build">build: {__APP_COMMIT__}</p>
-      </div>
-    </main>
-  )
+  const { settings } = useSettings()
+  const { path } = useRouter()
+
+  if (!settings.onboarded) {
+    return <OnboardingPage />
+  }
+
+  const route = ROUTES[path] ?? ROUTES['/']
+
+  return <AppShell title={route.title}>{route.element}</AppShell>
 }
 
 export default App
