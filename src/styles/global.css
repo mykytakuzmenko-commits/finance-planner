@@ -1,0 +1,85 @@
+:root {
+  --bg: #0f1220;
+  --bg-card: #191d2e;
+  --border: #2a2f45;
+  --text: #f5f6fa;
+  --text-muted: #9aa3bf;
+  --accent: #4ade80;
+  --accent-soft: rgba(74, 222, 128, 0.12);
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, #1b2036 0%, var(--bg) 60%);
+}
+
+.init-screen {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.init-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.init-badge {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 18px;
+}
+
+.init-card h1 {
+  margin: 0 0 12px;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.init-status {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.init-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .init-card {
+    padding: 32px 22px;
+  }
+}
