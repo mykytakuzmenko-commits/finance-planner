@@ -72,3 +72,11 @@ Each milestone ends with a deployed build and an explicit approval gate before
 the next one begins.
 
 **All 11 milestones (0–10) are complete — the MVP is feature-complete and deployed.**
+
+### Cloud sync (post-MVP)
+
+The app now supports **multi-device sync via Supabase**: email/password login, per-user
+data in Supabase Postgres with Row Level Security, and settings in a `profiles` table.
+See [`docs/supabase/schema.sql`](docs/supabase/schema.sql) for the database schema. The
+publishable Supabase key is public by design (protected by RLS); the secret key is never
+committed.
