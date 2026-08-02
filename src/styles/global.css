@@ -2085,7 +2085,21 @@ h3 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
-  align-items: start;
+  align-items: stretch;
+}
+/* Cards in a row share the tallest height; short content centers so
+   there are no empty gaps and the card bottoms line up. */
+.dash-charts > .section-card,
+.dash-bottom > .section-card {
+  display: flex;
+  flex-direction: column;
+}
+.dash-charts .donut {
+  flex: 1;
+}
+.dash-bottom .acct-cards {
+  flex: 1;
+  align-content: center;
 }
 .chart-box { width: 100%; }
 .chart-legend {
@@ -2111,8 +2125,8 @@ h3 {
 .donut { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .donut__chart {
   position: relative;
-  width: 170px;
-  height: 170px;
+  width: 190px;
+  height: 190px;
   flex-shrink: 0;
 }
 .donut__center {

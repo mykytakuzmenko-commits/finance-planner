@@ -27,15 +27,15 @@ export function ExpenseDonut({ data, currency }: Props) {
   return (
     <div className="donut">
       <div className="donut__chart">
-        <PieChart width={170} height={170}>
+        <PieChart width={190} height={190}>
           <Pie
             data={slices}
             dataKey="value"
             nameKey="name"
-            cx={85}
-            cy={85}
-            innerRadius={52}
-            outerRadius={82}
+            cx={95}
+            cy={95}
+            innerRadius={58}
+            outerRadius={92}
             paddingAngle={2}
             stroke="none"
             isAnimationActive={false}
