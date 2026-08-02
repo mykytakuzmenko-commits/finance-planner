@@ -2091,6 +2091,47 @@ h3 {
   margin-bottom: 4px;
 }
 
+/* Subscriptions / regular payments */
+.subs__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.subs__head .section__title { margin: 0; }
+.subs__total {
+  font-weight: 800;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.subs__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.subs__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.subs__item:first-child { border-top: none; }
+.subs__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.subs__label { font-weight: 600; }
+.subs__meta { font-size: 0.76rem; color: var(--text-muted); }
+.subs__amount { font-weight: 800; white-space: nowrap; }
+.subs__note {
+  margin: 12px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
 /* At-a-glance insights */
 .insights {
   display: grid;

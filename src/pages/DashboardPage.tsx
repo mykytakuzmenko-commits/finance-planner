@@ -18,7 +18,9 @@ import { TransactionList } from '../components/finance/TransactionList'
 import { ForecastPanel } from '../components/finance/ForecastPanel'
 import { RecommendationsPanel } from '../components/finance/RecommendationsPanel'
 import { InsightsStrip } from '../components/finance/InsightsStrip'
+import { SubscriptionsCard } from '../components/finance/SubscriptionsCard'
 import { buildInsights } from '../calculations/insights'
+import { detectSubscriptions } from '../calculations/subscriptions'
 import { AccountCards } from '../components/finance/AccountCards'
 import { useRecommendations } from '../hooks/useRecommendations'
 import { getLastBackup } from '../services/backup'
@@ -139,6 +141,10 @@ export function DashboardPage() {
   )
 
   const insights = useMemo(() => buildInsights(cashFlow, breakdown), [cashFlow, breakdown])
+  const subscriptions = useMemo(
+    () => detectSubscriptions(transactions, categories, accounts, rates, currency, month),
+    [transactions, categories, accounts, rates, currency],
+  )
 
   const recommendations = useRecommendations()
   const recent = useMemo(
@@ -298,6 +304,9 @@ export function DashboardPage() {
 
       {/* Recommendations */}
       <RecommendationsPanel recommendations={recommendations} />
+
+      {/* Detected subscriptions / regular payments */}
+      <SubscriptionsCard subscriptions={subscriptions} currency={currency} />
 
       {/* Recent transactions + account cards */}
       <div className="dash-bottom">
