@@ -13,6 +13,7 @@ import { MonthSwitcher } from '../components/finance/MonthSwitcher'
 import { StatusBadge } from '../components/finance/StatusBadge'
 import { PlanItemLinkModal } from '../components/finance/PlanItemLinkModal'
 import type { PlanItem } from '../types/planning'
+import type { Transaction } from '../types/finance'
 
 export function AnalysisPage() {
   const { loading: planLoading, itemsForMonth, ensureMonth } = usePlanning()
@@ -23,7 +24,16 @@ export function AnalysisPage() {
 
   const [month, setMonth] = useState(currentMonth())
   const [linkItem, setLinkItem] = useState<PlanItem | null>(null)
+  const [openItems, setOpenItems] = useState<Set<string>>(() => new Set())
   const [closed, setClosed] = useState<MonthReport | null>(() => getReport(currentMonth()))
+
+  const toggleItem = (id: string) =>
+    setOpenItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
 
   useEffect(() => {
     if (!planLoading) void ensureMonth(month)
@@ -35,6 +45,8 @@ export function AnalysisPage() {
     () => buildPlanFact(month, planItems, transactions, categories, todayISO()),
     [month, planItems, transactions, categories],
   )
+
+  const txById = useMemo(() => new Map(transactions.map((t) => [t.id, t])), [transactions])
 
   const accountName = useMemo(() => {
     const map = new Map(accounts.map((a) => [a.id, a.name]))
@@ -230,23 +242,74 @@ export function AnalysisPage() {
               <ul className="plan-fact-list">
                 {[...planItems]
                   .map((i) => fact.items.find((f) => f.item.id === i.id)!)
-                  .map((f) => (
-                    <li key={f.item.id} className="plan-fact">
-                      <div className="plan-fact__text">
-                        <span className="plan-fact__name">
-                          {f.item.name}
-                          <StatusBadge status={f.status} />
-                        </span>
-                        <span className="plan-fact__nums">
-                          план {money(f.planned)} · факт {money(f.actual)}
-                          {f.linkedTxIds.length > 0 && ` · ${f.linkedTxIds.length} оп.`}
-                        </span>
-                      </div>
-                      <Button variant="secondary" onClick={() => setLinkItem(f.item)}>
-                        Привʼязати
-                      </Button>
-                    </li>
-                  ))}
+                  .map((f) => {
+                    const linked = f.linkedTxIds
+                      .map((id) => txById.get(id))
+                      .filter((t): t is Transaction => Boolean(t))
+                    const open = openItems.has(f.item.id)
+                    const hasLinked = linked.length > 0
+                    const Nums = (
+                      <span className="plan-fact__nums">
+                        план {money(f.planned)} · факт {money(f.actual)}
+                        {hasLinked && ` · ${linked.length} оп.`}
+                      </span>
+                    )
+                    return (
+                      <li key={f.item.id} className="plan-item">
+                        <div className="plan-item__row">
+                          {hasLinked ? (
+                            <button
+                              type="button"
+                              className="plan-item__toggle"
+                              aria-expanded={open}
+                              onClick={() => toggleItem(f.item.id)}
+                            >
+                              <span className={`plan-caret ${open ? 'is-open' : ''}`} aria-hidden="true">
+                                ▾
+                              </span>
+                              <span className="plan-fact__text">
+                                <span className="plan-fact__name">
+                                  {f.item.name}
+                                  <StatusBadge status={f.status} />
+                                </span>
+                                {Nums}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="plan-item__toggle plan-item__toggle--static">
+                              <span className="plan-fact__text">
+                                <span className="plan-fact__name">
+                                  {f.item.name}
+                                  <StatusBadge status={f.status} />
+                                </span>
+                                {Nums}
+                              </span>
+                            </span>
+                          )}
+                          <Button variant="secondary" onClick={() => setLinkItem(f.item)}>
+                            Привʼязати
+                          </Button>
+                        </div>
+                        {open && hasLinked && (
+                          <ul className="plan-linked">
+                            {linked.map((t) => (
+                              <li key={t.id} className="plan-linked__row">
+                                <span className="plan-linked__cat">{categoryName(t.categoryId)}</span>
+                                <span className="plan-linked__meta">
+                                  {accountName(t.accountId)}
+                                  {t.note ? ` · ${t.note}` : ''}
+                                </span>
+                                <span className={`plan-linked__amount plan-fact__amount--${t.type}`}>
+                                  {t.type === 'income' ? '+' : '−'}
+                                  {money(t.amount)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                  })}
               </ul>
             </section>
           )}
