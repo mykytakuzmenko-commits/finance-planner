@@ -2091,6 +2091,30 @@ h3 {
   margin-bottom: 4px;
 }
 
+/* Net worth */
+.nw__top { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.nw__headline { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.nw__label { margin: 0; }
+.nw__value { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; }
+.nw__change { font-size: 0.82rem; font-weight: 700; }
+.nw__change.is-up { color: var(--accent); }
+.nw__change.is-down { color: var(--danger); }
+.nw-spark { width: 180px; max-width: 45%; height: 46px; flex-shrink: 0; }
+.nw__split { display: flex; gap: 12px; margin-top: 16px; }
+.nw__part {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+.nw__part-label { font-size: 0.78rem; color: var(--text-muted); }
+.nw__part-value { font-size: 1.15rem; font-weight: 800; }
+.nw__part-value.pos { color: var(--accent); }
+
 /* Profile page */
 .profile-hero {
   display: flex;

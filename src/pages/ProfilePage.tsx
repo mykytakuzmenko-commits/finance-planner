@@ -15,6 +15,8 @@ import { buildForecast } from '../calculations/forecast'
 import { buildSavingsSummary } from '../calculations/savings'
 import { buildPlanFact } from '../calculations/planFact'
 import { buildProfile } from '../calculations/profile'
+import { buildNetWorth } from '../calculations/netWorth'
+import { NetWorthCard } from '../components/finance/NetWorthCard'
 
 function scoreTone(score: number): string {
   if (score >= 80) return 'good'
@@ -74,6 +76,11 @@ export function ProfilePage() {
     return buildProfile({ transactions, categories, accounts, rates, base, savings, forecast, goals, discipline })
   }, [transactions, categories, accounts, balances, rates, base, planItems, goals, settings.emergencyTargetMonths, month, today])
 
+  const netWorth = useMemo(
+    () => buildNetWorth(accounts, balances, transactions, rates, month),
+    [accounts, balances, transactions, rates, month],
+  )
+
   const email = session?.user.email ?? ''
   const initials = (email.slice(0, 2) || '👤').toUpperCase()
   const created = session?.user.created_at
@@ -95,6 +102,9 @@ export function ProfilePage() {
           <Icon name="close" size={16} /> Вийти
         </Button>
       </section>
+
+      {/* Net worth */}
+      <NetWorthCard netWorth={netWorth} currency={base} />
 
       {/* Financial health */}
       <section className="section-card">
