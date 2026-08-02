@@ -2,37 +2,40 @@ import { useEffect, useMemo, useState } from 'react'
 import { useData } from '../state/DataContext'
 import { usePlanning } from '../state/PlanningContext'
 import { useSettings } from '../state/SettingsContext'
+import { useSavingsGoals } from '../state/SavingsGoalsContext'
 import { formatMoney } from '../utils/money'
 import { toBase } from '../utils/rates'
 import { currentMonth, formatMonth } from '../utils/month'
-import { todayISO } from '../utils/date'
 import { buildForecast } from '../calculations/forecast'
-import { buildPlanFact } from '../calculations/planFact'
+import { buildMonthlyCashFlow, buildExpenseBreakdown } from '../calculations/charts'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { KpiCard } from '../components/finance/KpiCard'
 import { AccountFormModal } from '../components/finance/AccountFormModal'
 import { TransactionFormModal } from '../components/finance/TransactionFormModal'
 import { TransactionList } from '../components/finance/TransactionList'
-import { CashFlowBar } from '../components/finance/CashFlowBar'
 import { ForecastPanel } from '../components/finance/ForecastPanel'
 import { RecommendationsPanel } from '../components/finance/RecommendationsPanel'
+import { CashFlowChart } from '../components/finance/CashFlowChart'
+import { ExpenseDonut } from '../components/finance/ExpenseDonut'
+import { AccountCards } from '../components/finance/AccountCards'
 import { useRecommendations } from '../hooks/useRecommendations'
 import { getLastBackup } from '../services/backup'
 import { Link } from '../router/Router'
 import type { Account, Transaction } from '../types/finance'
-import type { PlanItem } from '../types/planning'
 
 const month = currentMonth()
 
-function expectedDay(item: PlanItem): number {
-  const [y, m] = item.month.split('-').map(Number)
-  return item.dueDay ?? new Date(y, m, 0).getDate()
-}
-function expectedISO(item: PlanItem): string {
-  return `${item.month}-${String(expectedDay(item)).padStart(2, '0')}`
+function ChangeBadge({ pct, positiveIsGood = true }: { pct: number | null; positiveIsGood?: boolean }) {
+  if (pct === null || !Number.isFinite(pct)) return null
+  const up = pct >= 0
+  const good = up === positiveIsGood
+  return (
+    <span className={`change ${good ? 'change--up' : 'change--down'}`}>
+      {up ? '↑' : '↓'} {Math.abs(pct).toFixed(1)}%
+    </span>
+  )
 }
 
 export function DashboardPage() {
@@ -46,8 +49,10 @@ export function DashboardPage() {
     deleteTransaction,
   } = useData()
   const { loading: planLoading, itemsForMonth, ensureMonth } = usePlanning()
+  const { goals } = useSavingsGoals()
   const { settings } = useSettings()
   const currency = settings.baseCurrency
+  const rates = settings.exchangeRates
   const loading = dataLoading || planLoading
 
   const [accountModal, setAccountModal] = useState(false)
@@ -56,66 +61,6 @@ export function DashboardPage() {
   const [txModal, setTxModal] = useState(false)
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
   const [deletingTx, setDeletingTx] = useState<Transaction | null>(null)
-
-  useEffect(() => {
-    if (!planLoading) void ensureMonth(month)
-  }, [planLoading, ensureMonth])
-
-  const rates = settings.exchangeRates
-  const accountCurrency = useMemo(() => {
-    const map = new Map(accounts.map((a) => [a.id, a.currency]))
-    return (id?: string) => (id ? map.get(id) ?? currency : currency)
-  }, [accounts, currency])
-
-  const planItems = itemsForMonth(month)
-  const monthTx = useMemo(
-    () => transactions.filter((t) => t.date.startsWith(`${month}-`)),
-    [transactions],
-  )
-  // Convert to base currency so multi-currency accounts total correctly.
-  const currentBalanceBase = useMemo(
-    () => accounts.reduce((s, a) => s + toBase(balances.get(a.id) ?? 0, a.currency, rates), 0),
-    [accounts, balances, rates],
-  )
-  const monthTxBase = useMemo(
-    () =>
-      monthTx.map((t) => ({
-        ...t,
-        amount: toBase(t.amount, accountCurrency(t.accountId), rates),
-      })),
-    [monthTx, accountCurrency, rates],
-  )
-  const forecast = useMemo(
-    () => buildForecast(currentBalanceBase, monthTxBase, planItems),
-    [currentBalanceBase, monthTxBase, planItems],
-  )
-  const overspentCount = useMemo(
-    () =>
-      buildPlanFact(month, planItems, transactions, categories, todayISO()).categories.filter(
-        (c) => c.status === 'overspent',
-      ).length,
-    [planItems, transactions, categories],
-  )
-
-  const today = todayISO()
-  const events = useMemo(
-    () =>
-      [...planItems]
-        .filter((i) => expectedISO(i) >= today)
-        .sort((a, b) => expectedDay(a) - expectedDay(b))
-        .slice(0, 6),
-    [planItems, today],
-  )
-
-  const recent = useMemo(
-    () =>
-      [...transactions]
-        .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt)
-        .slice(0, 5),
-    [transactions],
-  )
-
-  const recommendations = useRecommendations()
 
   const [backupSnoozed, setBackupSnoozed] = useState(
     () => sessionStorage.getItem('pfp.backupSnooze') === '1',
@@ -128,6 +73,73 @@ export function DashboardPage() {
     return !Number.isFinite(age) || age > 14 * 86400000
   }, [backupSnoozed])
 
+  useEffect(() => {
+    if (!planLoading) void ensureMonth(month)
+  }, [planLoading, ensureMonth])
+
+  const planItems = itemsForMonth(month)
+
+  const accountCurrency = useMemo(() => {
+    const map = new Map(accounts.map((a) => [a.id, a.currency]))
+    return (id?: string) => (id ? map.get(id) ?? currency : currency)
+  }, [accounts, currency])
+
+  const currentBalanceBase = useMemo(
+    () => accounts.reduce((s, a) => s + toBase(balances.get(a.id) ?? 0, a.currency, rates), 0),
+    [accounts, balances, rates],
+  )
+  const monthTxBase = useMemo(
+    () =>
+      transactions
+        .filter((t) => t.date.startsWith(`${month}-`))
+        .map((t) => ({ ...t, amount: toBase(t.amount, accountCurrency(t.accountId), rates) })),
+    [transactions, accountCurrency, rates],
+  )
+  const forecast = useMemo(
+    () => buildForecast(currentBalanceBase, monthTxBase, planItems),
+    [currentBalanceBase, monthTxBase, planItems],
+  )
+
+  const cashFlow = useMemo(
+    () => buildMonthlyCashFlow(transactions, accounts, rates, currency, 6),
+    [transactions, accounts, rates, currency],
+  )
+  const breakdown = useMemo(
+    () => buildExpenseBreakdown(transactions, categories, accounts, rates, currency, month),
+    [transactions, categories, accounts, rates, currency],
+  )
+
+  const incomeChange = useMemo(() => {
+    const [prev, cur] = [cashFlow.at(-2)?.income, cashFlow.at(-1)?.income]
+    if (!prev || cur === undefined) return null
+    return ((cur - prev) / prev) * 100
+  }, [cashFlow])
+  const expenseChange = useMemo(() => {
+    const [prev, cur] = [cashFlow.at(-2)?.expense, cashFlow.at(-1)?.expense]
+    if (!prev || cur === undefined) return null
+    return ((cur - prev) / prev) * 100
+  }, [cashFlow])
+
+  const topGoals = useMemo(
+    () =>
+      goals.slice(0, 2).map((g) => ({
+        name: g.name,
+        pct: g.target > 0 ? Math.min(100, (g.saved / g.target) * 100) : 0,
+      })),
+    [goals],
+  )
+
+  const recommendations = useRecommendations()
+  const recent = useMemo(
+    () =>
+      [...transactions]
+        .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt)
+        .slice(0, 5),
+    [transactions],
+  )
+
+  const money = (m: number) => formatMoney(m, currency)
+
   if (loading) return <div className="page__loading">Завантаження…</div>
 
   if (accounts.length === 0) {
@@ -136,7 +148,7 @@ export function DashboardPage() {
         <EmptyState
           icon="wallet"
           title="Додайте перший рахунок"
-          description="Рахунок — це де лежать ваші гроші: картка, готівка, ощадний рахунок. Після цього зʼявляться баланс, прогноз і safe-to-spend."
+          description="Рахунок — це де лежать ваші гроші: картка, готівка, ощадний рахунок. Після цього зʼявляться баланс, прогноз і графіки."
           action={
             <Button onClick={() => setAccountModal(true)}>
               <Icon name="plus" size={18} /> Додати рахунок
@@ -148,20 +160,25 @@ export function DashboardPage() {
     )
   }
 
-  const money = (m: number) => formatMoney(m, currency)
-
   return (
-    <div className="page">
-      <p className="dash-month">{formatMonth(month)}</p>
+    <div className="page dash">
+      <div className="dash__head">
+        <p className="dash-month">{formatMonth(month)}</p>
+        <Button
+          onClick={() => {
+            setEditingTx(null)
+            setTxModal(true)
+          }}
+        >
+          <Icon name="plus" size={18} /> Додати операцію
+        </Button>
+      </div>
 
-      {/* Backup reminder */}
       {backupOverdue && (
         <div className="alert alert--warning backup-reminder">
           <span>Давно не робили резервну копію — експортуйте дані, щоб не втратити їх.</span>
           <span className="report-actions">
-            <Link to="/settings" className="btn btn--secondary">
-              До налаштувань
-            </Link>
+            <Link to="/settings" className="btn btn--secondary">До налаштувань</Link>
             <button
               type="button"
               className="btn btn--ghost"
@@ -175,58 +192,89 @@ export function DashboardPage() {
           </span>
         </div>
       )}
-
-      {/* Alerts */}
       {forecast.deficit > 0 && (
         <div className="alert alert--danger">
-          <strong>Дефіцит: {money(forecast.deficit)}.</strong> Навіть з гарантованими
-          доходами прогнозованих коштів не вистачає на заплановані витрати.
-        </div>
-      )}
-      {forecast.deficit === 0 && forecast.safeToSpend < 0 && (
-        <div className="alert alert--warning">
-          <strong>Safe-to-spend відʼємний ({money(forecast.safeToSpend)}).</strong> Щоб
-          вийти на планові заощадження, стримайте додаткові витрати.
-        </div>
-      )}
-      {overspentCount > 0 && (
-        <div className="alert alert--warning">
-          {overspentCount} {overspentCount === 1 ? 'категорія перевищила' : 'категорій перевищили'} план.
-          Деталі — у розділі «Аналітика».
+          <strong>Дефіцит: {money(forecast.deficit)}.</strong> Прогнозованих коштів не
+          вистачає на заплановані витрати.
         </div>
       )}
 
-      {/* Hero: balance & safe-to-spend */}
-      <div className="hero-grid">
-        <div className="hero-card">
-          <span className="hero-card__label">Поточний баланс</span>
-          <span className="hero-card__value">{money(forecast.currentBalance)}</span>
-        </div>
-        <div className={`hero-card hero-card--accent ${forecast.safeToSpend < 0 ? 'is-negative' : ''}`}>
-          <span className="hero-card__label">Safe-to-spend</span>
-          <span className="hero-card__value">{money(forecast.safeToSpend)}</span>
-          <span className="hero-card__hint">
-            можна витратити, зберігши план і заощадження
+      {/* Top: balance hero + KPI cards */}
+      <div className="dash-top">
+        <div className="balance-hero">
+          <span className="balance-hero__label">Загальний баланс</span>
+          <span className="balance-hero__value">{money(forecast.currentBalance)}</span>
+          <span className="balance-hero__sub">
+            Safe-to-spend:{' '}
+            <strong className={forecast.safeToSpend < 0 ? 'neg' : 'pos'}>
+              {money(forecast.safeToSpend)}
+            </strong>
           </span>
+          <svg className="balance-hero__art" viewBox="0 0 120 90" aria-hidden="true">
+            <rect x="12" y="20" width="96" height="60" rx="12" fill="#0f1220" opacity="0.55" />
+            <rect x="12" y="20" width="96" height="60" rx="12" fill="none" stroke="#4ade80" strokeWidth="2" opacity="0.5" />
+            <rect x="70" y="42" width="42" height="20" rx="6" fill="#4ade80" opacity="0.9" />
+            <circle cx="88" cy="52" r="5" fill="#0f1220" />
+          </svg>
+        </div>
+
+        <div className="kpi-stat kpi-stat--income">
+          <div className="kpi-stat__head">
+            <span>Доходи (місяць)</span>
+            <span className="kpi-stat__icon"><Icon name="wallet" size={16} /></span>
+          </div>
+          <span className="kpi-stat__value">{money(forecast.actualIncome)}</span>
+          <ChangeBadge pct={incomeChange} />
+        </div>
+
+        <div className="kpi-stat kpi-stat--expense">
+          <div className="kpi-stat__head">
+            <span>Витрати (місяць)</span>
+            <span className="kpi-stat__icon"><Icon name="transactions" size={16} /></span>
+          </div>
+          <span className="kpi-stat__value">{money(forecast.actualExpense)}</span>
+          <ChangeBadge pct={expenseChange} positiveIsGood={false} />
+        </div>
+
+        <div className="kpi-stat kpi-stat--savings">
+          <div className="kpi-stat__head">
+            <span>Заощадження (місяць)</span>
+            <span className="kpi-stat__icon"><Icon name="savings" size={16} /></span>
+          </div>
+          <span className="kpi-stat__value">{money(forecast.actualSavings)}</span>
+          {topGoals.length > 0 ? (
+            <div className="kpi-goals">
+              {topGoals.map((g) => (
+                <div key={g.name} className="kpi-goal">
+                  <span className="kpi-goal__label">
+                    {g.name} <span>{g.pct.toFixed(0)}%</span>
+                  </span>
+                  <div className="budget-bar">
+                    <div className="budget-bar__fill budget-bar__fill--on-track" style={{ width: `${g.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Link to="/savings" className="kpi-stat__link">Додати ціль →</Link>
+          )}
         </div>
       </div>
 
-      <div className="quick-actions">
-        <Button
-          onClick={() => {
-            setEditingTx(null)
-            setTxModal(true)
-          }}
-        >
-          <Icon name="plus" size={18} /> Додати операцію
-        </Button>
+      {/* Charts */}
+      <div className="dash-charts">
+        <section className="section-card">
+          <h2 className="section__title">Аналіз грошових потоків</h2>
+          <CashFlowChart data={cashFlow} currency={currency} />
+        </section>
+        <section className="section-card">
+          <h2 className="section__title">Розподіл витрат</h2>
+          <ExpenseDonut data={breakdown} currency={currency} />
+        </section>
       </div>
-
-      {/* Recommendations */}
-      <RecommendationsPanel recommendations={recommendations} />
 
       {/* Forecast */}
-      <section className="section">
+      <section className="section-card">
         <h2 className="section__title">Прогноз залишку на кінець місяця</h2>
         <ForecastPanel
           guaranteed={forecast.guaranteedForecast}
@@ -236,118 +284,53 @@ export function DashboardPage() {
         />
       </section>
 
-      {/* Cash flow */}
-      <section className="section">
-        <h2 className="section__title">Рух коштів за місяць</h2>
-        <CashFlowBar
-          actualIncome={forecast.actualIncome}
-          upcomingIncome={forecast.upcomingIncomeWeighted}
-          actualExpense={forecast.actualExpense}
-          upcomingExpense={forecast.upcomingExpense}
-          currency={currency}
-        />
-      </section>
+      {/* Recommendations */}
+      <RecommendationsPanel recommendations={recommendations} />
 
-      {/* This-month KPIs */}
-      <section className="section">
-        <h2 className="section__title">Цей місяць</h2>
-        <div className="kpi-row kpi-row--3">
-          <KpiCard label="Фактичний дохід" value={money(forecast.actualIncome)} tone="income" />
-          <KpiCard label="Фактичні витрати" value={money(forecast.actualExpense)} tone="expense" />
-          <KpiCard label="Майбутні доходи" value={money(forecast.upcomingIncomeWeighted)} tone="income" />
-          <KpiCard label="Майбутні витрати" value={money(forecast.upcomingExpense)} tone="expense" />
-          <KpiCard label="Планові заощадження" value={money(forecast.plannedSavings)} />
-          <KpiCard label="Фактичні заощадження" value={money(forecast.actualSavings)} />
-        </div>
-      </section>
-
-      {/* Upcoming events */}
-      {events.length > 0 && (
-        <section className="section">
-          <h2 className="section__title">Майбутні події</h2>
-          <ul className="event-list">
-            {events.map((e) => (
-              <li key={e.id} className="event-row">
-                <span className="event-row__day">{expectedDay(e)}</span>
-                <span className="event-row__name">{e.name}</span>
-                <span className={`event-row__amount event-row__amount--${e.kind}`}>
-                  {e.kind === 'income' ? '+' : '−'}
-                  {money(e.amount)}
-                </span>
-              </li>
-            ))}
-          </ul>
+      {/* Recent transactions + account cards */}
+      <div className="dash-bottom">
+        <section className="section-card">
+          <h2 className="section__title">Останні операції</h2>
+          {recent.length === 0 ? (
+            <p className="section__empty">Операцій ще немає. Натисніть «Додати операцію».</p>
+          ) : (
+            <TransactionList
+              transactions={recent}
+              accounts={accounts}
+              categories={categories}
+              onEdit={(t) => {
+                setEditingTx(t)
+                setTxModal(true)
+              }}
+              onDelete={(t) => setDeletingTx(t)}
+            />
+          )}
         </section>
-      )}
 
-      {/* Accounts */}
-      <section className="section">
-        <div className="section__head">
-          <h2 className="section__title">Рахунки</h2>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setEditingAccount(null)
+        <section className="section-card">
+          <div className="section__head">
+            <h2 className="section__title">Мої рахунки</h2>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setEditingAccount(null)
+                setAccountModal(true)
+              }}
+            >
+              <Icon name="plus" size={16} /> Рахунок
+            </Button>
+          </div>
+          <AccountCards
+            accounts={accounts}
+            balances={balances}
+            onEdit={(a) => {
+              setEditingAccount(a)
               setAccountModal(true)
             }}
-          >
-            <Icon name="plus" size={16} /> Рахунок
-          </Button>
-        </div>
-        <ul className="account-list">
-          {accounts.map((a) => (
-            <li key={a.id} className="account-row">
-              <div className="account-row__info">
-                <span className="account-row__name">{a.name}</span>
-                <span className="account-row__currency">{a.currency}</span>
-              </div>
-              <span className="account-row__balance">
-                {formatMoney(balances.get(a.id) ?? 0, a.currency)}
-              </span>
-              <div className="account-row__actions">
-                <button
-                  type="button"
-                  className="icon-btn"
-                  aria-label={`Редагувати рахунок ${a.name}`}
-                  onClick={() => {
-                    setEditingAccount(a)
-                    setAccountModal(true)
-                  }}
-                >
-                  <Icon name="settings" size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="icon-btn icon-btn--danger"
-                  aria-label={`Видалити рахунок ${a.name}`}
-                  onClick={() => setDeletingAccount(a)}
-                >
-                  <Icon name="close" size={16} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Recent operations */}
-      <section className="section">
-        <h2 className="section__title">Останні операції</h2>
-        {recent.length === 0 ? (
-          <p className="section__empty">Операцій ще немає. Натисніть «Додати операцію».</p>
-        ) : (
-          <TransactionList
-            transactions={recent}
-            accounts={accounts}
-            categories={categories}
-            onEdit={(t) => {
-              setEditingTx(t)
-              setTxModal(true)
-            }}
-            onDelete={(t) => setDeletingTx(t)}
+            onDelete={(a) => setDeletingAccount(a)}
           />
-        )}
-      </section>
+        </section>
+      </div>
 
       <AccountFormModal
         open={accountModal}
@@ -368,7 +351,7 @@ export function DashboardPage() {
       <ConfirmDialog
         open={Boolean(deletingAccount)}
         title="Видалити рахунок?"
-        message={`Рахунок «${deletingAccount?.name}» та всі повʼязані з ним операції буде видалено без можливості відновлення.`}
+        message={`Рахунок «${deletingAccount?.name}» та всі повʼязані операції буде видалено.`}
         confirmLabel="Видалити"
         danger
         onCancel={() => setDeletingAccount(null)}
