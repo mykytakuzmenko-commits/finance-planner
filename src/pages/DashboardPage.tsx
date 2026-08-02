@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useData } from '../state/DataContext'
 import { usePlanning } from '../state/PlanningContext'
 import { useSettings } from '../state/SettingsContext'
@@ -17,8 +17,6 @@ import { TransactionFormModal } from '../components/finance/TransactionFormModal
 import { TransactionList } from '../components/finance/TransactionList'
 import { ForecastPanel } from '../components/finance/ForecastPanel'
 import { RecommendationsPanel } from '../components/finance/RecommendationsPanel'
-import { CashFlowChart } from '../components/finance/CashFlowChart'
-import { ExpenseDonut } from '../components/finance/ExpenseDonut'
 import { InsightsStrip } from '../components/finance/InsightsStrip'
 import { buildInsights } from '../calculations/insights'
 import { AccountCards } from '../components/finance/AccountCards'
@@ -26,6 +24,15 @@ import { useRecommendations } from '../hooks/useRecommendations'
 import { getLastBackup } from '../services/backup'
 import { Link } from '../router/Router'
 import type { Account, Transaction } from '../types/finance'
+
+// Charts pull in the (heavy) Recharts library — load them lazily so the
+// dashboard shell, KPIs and insights paint before the chart chunk arrives.
+const CashFlowChart = lazy(() =>
+  import('../components/finance/CashFlowChart').then((m) => ({ default: m.CashFlowChart })),
+)
+const ExpenseDonut = lazy(() =>
+  import('../components/finance/ExpenseDonut').then((m) => ({ default: m.ExpenseDonut })),
+)
 
 const month = currentMonth()
 
@@ -266,11 +273,15 @@ export function DashboardPage() {
       <div className="dash-charts">
         <section className="section-card">
           <h2 className="section__title">Аналіз грошових потоків</h2>
-          <CashFlowChart data={cashFlow} currency={currency} />
+          <Suspense fallback={<div className="chart-skeleton" />}>
+            <CashFlowChart data={cashFlow} currency={currency} />
+          </Suspense>
         </section>
         <section className="section-card">
           <h2 className="section__title">Розподіл витрат</h2>
-          <ExpenseDonut data={breakdown} currency={currency} />
+          <Suspense fallback={<div className="chart-skeleton" />}>
+            <ExpenseDonut data={breakdown} currency={currency} />
+          </Suspense>
         </section>
       </div>
 

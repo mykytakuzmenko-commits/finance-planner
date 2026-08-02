@@ -2144,6 +2144,18 @@ h3 {
   align-content: center;
 }
 .chart-box { width: 100%; }
+.chart-skeleton {
+  width: 100%;
+  min-height: 230px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-elevated) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: chart-skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes chart-skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .chart-legend {
   display: flex;
   gap: 16px;
