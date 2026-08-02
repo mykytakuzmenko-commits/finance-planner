@@ -204,33 +204,6 @@ export function AnalysisPage() {
             </div>
           </section>
 
-          {/* Category breakdown */}
-          {fact.categories.length > 0 && (
-            <section className="section">
-              <h2 className="section__title">За категоріями</h2>
-              <ul className="cat-fact-list">
-                {fact.categories.map((c) => (
-                  <li key={c.key} className="cat-fact">
-                    <div className="cat-fact__head">
-                      <span className="cat-fact__name">
-                        {c.categoryName}
-                        <span className="cat-fact__kind">
-                          {c.kind === 'income' ? 'дохід' : 'витрата'}
-                        </span>
-                      </span>
-                      <StatusBadge status={c.status} />
-                    </div>
-                    <div className="cat-fact__nums">
-                      <span>план {money(c.planned)}</span>
-                      <span>факт {money(c.actual)}</span>
-                      <span className={devClass(c.deviation)}>{signed(c.deviation)}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
           {/* Plan item fulfilment / linking */}
           {planItems.length > 0 && (
             <section className="section">

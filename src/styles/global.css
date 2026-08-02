@@ -1108,40 +1108,6 @@ h3 {
   flex-direction: column;
   gap: 8px;
 }
-.cat-fact {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-}
-.cat-fact__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.cat-fact__name {
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.cat-fact__kind {
-  font-size: 0.68rem;
-  color: var(--text-faint);
-  border: 1px solid var(--border-strong);
-  border-radius: 5px;
-  padding: 0 5px;
-}
-.cat-fact__nums {
-  display: flex;
-  gap: 14px;
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-
 .plan-fact {
   display: flex;
   align-items: center;
