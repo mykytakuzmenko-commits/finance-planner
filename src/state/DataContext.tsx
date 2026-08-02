@@ -17,6 +17,8 @@ import {
   putRecord,
 } from '../db/database'
 import { buildDefaultCategories } from '../services/seed'
+import { loadSnapshot, saveSnapshot } from '../services/offlineCache'
+import { useAuth } from './AuthContext'
 import { createId } from '../utils/id'
 import {
   computeAccountBalances,
@@ -79,6 +81,8 @@ async function ensureCategories(): Promise<Category[]> {
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const { session } = useAuth()
+  const userId = session?.user.id ?? null
   const [loading, setLoading] = useState(true)
   const [accounts, setAccounts] = useState<Account[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -95,9 +99,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ])
         if (cancelled) return
         // Keep a stable, predictable order (IndexedDB returns by key, not by insertion).
-        setAccounts([...acc].sort((a, b) => a.createdAt - b.createdAt))
-        setCategories([...categoryList].sort((a, b) => a.createdAt - b.createdAt))
+        const sortedAcc = [...acc].sort((a, b) => a.createdAt - b.createdAt)
+        const sortedCat = [...categoryList].sort((a, b) => a.createdAt - b.createdAt)
+        setAccounts(sortedAcc)
+        setCategories(sortedCat)
         setTransactions(txs)
+        // Keep a read-only copy for offline viewing.
+        saveSnapshot(userId, { accounts: sortedAcc, categories: sortedCat, transactions: txs })
+      } catch {
+        // Fetch failed (most likely offline) — show the last cached snapshot
+        // instead of a misleading empty state.
+        const snap = loadSnapshot(userId)
+        if (!cancelled && snap) {
+          setAccounts(snap.accounts)
+          setCategories(snap.categories)
+          setTransactions(snap.transactions)
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -105,7 +122,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [userId])
 
   // ---- Accounts ----
   const addAccount = useCallback(

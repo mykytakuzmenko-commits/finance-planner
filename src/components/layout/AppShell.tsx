@@ -4,6 +4,7 @@ import { NAV_ITEMS } from '../../constants/nav'
 import { Icon } from '../ui/Icon'
 import { useSettings } from '../../state/SettingsContext'
 import { getCurrency } from '../../constants/currencies'
+import { OfflineBanner } from './OfflineBanner'
 
 interface AppShellProps {
   title: string
@@ -67,6 +68,7 @@ export function AppShell({ title, children }: AppShellProps) {
           </Link>
         </header>
 
+        <OfflineBanner />
         <main className="shell__content">{children}</main>
       </div>
 

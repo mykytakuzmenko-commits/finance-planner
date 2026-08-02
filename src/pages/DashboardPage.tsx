@@ -19,6 +19,8 @@ import { ForecastPanel } from '../components/finance/ForecastPanel'
 import { RecommendationsPanel } from '../components/finance/RecommendationsPanel'
 import { CashFlowChart } from '../components/finance/CashFlowChart'
 import { ExpenseDonut } from '../components/finance/ExpenseDonut'
+import { InsightsStrip } from '../components/finance/InsightsStrip'
+import { buildInsights } from '../calculations/insights'
 import { AccountCards } from '../components/finance/AccountCards'
 import { useRecommendations } from '../hooks/useRecommendations'
 import { getLastBackup } from '../services/backup'
@@ -128,6 +130,8 @@ export function DashboardPage() {
       })),
     [goals],
   )
+
+  const insights = useMemo(() => buildInsights(cashFlow, breakdown), [cashFlow, breakdown])
 
   const recommendations = useRecommendations()
   const recent = useMemo(
@@ -254,6 +258,9 @@ export function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* At-a-glance insights */}
+      <InsightsStrip insights={insights} />
 
       {/* Charts */}
       <div className="dash-charts">

@@ -238,6 +238,15 @@ h3 {
   margin: 0;
   font-size: 1.15rem;
 }
+.offline-banner {
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fde68a;
+  background: rgba(180, 130, 20, 0.18);
+  border-bottom: 1px solid rgba(180, 130, 20, 0.4);
+}
 .shell__content {
   flex: 1;
   width: 100%;
@@ -2078,6 +2087,36 @@ h3 {
   color: var(--text-muted);
   margin-bottom: 4px;
 }
+
+/* At-a-glance insights */
+.insights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+.insight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.insight__label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.insight__value {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.insight__mark { font-weight: 700; }
+.insight--good .insight__value,
+.insight--good .insight__mark { color: var(--accent); }
+.insight--bad .insight__value,
+.insight--bad .insight__mark { color: var(--danger); }
+.insight--neutral .insight__mark { color: var(--text-faint); }
 
 /* Chart grids */
 .dash-charts,
