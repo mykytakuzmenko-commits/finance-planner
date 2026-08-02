@@ -2111,6 +2111,11 @@ h3 {
   flex-wrap: wrap;
 }
 .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-note {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
 .chart-tooltip {
   background: var(--bg-elevated);
   border: 1px solid var(--border);

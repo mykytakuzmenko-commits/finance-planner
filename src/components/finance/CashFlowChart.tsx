@@ -1,6 +1,7 @@
 import {
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Line,
   ResponsiveContainer,
@@ -40,6 +41,7 @@ function CustomTooltip({ active, payload, label, currency }: any) {
 }
 
 export function CashFlowChart({ data, currency }: Props) {
+  const hasCurrent = data.some((d) => d.isCurrent)
   return (
     <div className="chart-box">
       <div className="chart-legend">
@@ -65,18 +67,49 @@ export function CashFlowChart({ data, currency }: Props) {
             cursor={{ fill: 'rgba(255,255,255,0.03)' }}
             content={<CustomTooltip currency={currency} />}
           />
-          <Bar dataKey="income" fill="#4ade80" radius={[4, 4, 0, 0]} maxBarSize={16} isAnimationActive={false} />
-          <Bar dataKey="expense" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={16} isAnimationActive={false} />
+          <Bar dataKey="income" fill="#4ade80" radius={[4, 4, 0, 0]} maxBarSize={16} isAnimationActive={false}>
+            {data.map((d) => (
+              <Cell key={d.month} fillOpacity={d.isCurrent ? 0.4 : 1} />
+            ))}
+          </Bar>
+          <Bar dataKey="expense" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={16} isAnimationActive={false}>
+            {data.map((d) => (
+              <Cell key={d.month} fillOpacity={d.isCurrent ? 0.4 : 1} />
+            ))}
+          </Bar>
           <Line
             type="monotone"
             dataKey="net"
             stroke="#a78bfa"
             strokeWidth={2}
-            dot={{ r: 3, fill: '#a78bfa' }}
             isAnimationActive={false}
+            dot={(props) => {
+              const { cx, cy, payload, index } = props as {
+                cx: number
+                cy: number
+                index: number
+                payload: CashFlowPoint
+              }
+              return (
+                <circle
+                  key={index}
+                  cx={cx}
+                  cy={cy}
+                  r={3}
+                  fill={payload.isCurrent ? '#1a1f36' : '#a78bfa'}
+                  stroke="#a78bfa"
+                  strokeWidth={payload.isCurrent ? 2 : 0}
+                />
+              )
+            }}
           />
         </ComposedChart>
       </ResponsiveContainer>
+      {hasCurrent && (
+        <p className="chart-note">
+          Останній місяць ще триває — дані накопичуються.
+        </p>
+      )}
     </div>
   )
 }

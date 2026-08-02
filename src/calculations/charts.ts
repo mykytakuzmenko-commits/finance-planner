@@ -19,6 +19,8 @@ export interface CashFlowPoint {
   income: number
   expense: number
   net: number
+  /** True for the month in progress (not yet complete). */
+  isCurrent: boolean
 }
 
 /** Income / expense / net per month (base currency, minor→major units) for the last N months. */
@@ -49,6 +51,7 @@ export function buildMonthlyCashFlow(
       income: Math.round(income),
       expense: Math.round(expense),
       net: Math.round(income - expense),
+      isCurrent: month === now,
     })
   }
   return points

@@ -4,6 +4,7 @@ import './styles/global.css'
 import { AppRoot } from './AppRoot.tsx'
 import { AuthProvider } from './state/AuthContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { registerServiceWorker } from './registerSW'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -14,3 +15,5 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 )
+
+registerServiceWorker()
