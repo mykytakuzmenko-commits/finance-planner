@@ -2091,6 +2091,114 @@ h3 {
   margin-bottom: 4px;
 }
 
+/* Profile page */
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(150deg, rgba(74, 222, 128, 0.16), var(--bg-card) 65%);
+  border: 1px solid rgba(74, 222, 128, 0.26);
+  border-radius: var(--radius);
+}
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0f1220;
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+.profile-id { display: flex; flex-direction: column; gap: 2px; margin-right: auto; min-width: 0; }
+.profile-email { font-weight: 700; overflow-wrap: anywhere; }
+.profile-since { font-size: 0.82rem; color: var(--text-muted); }
+
+/* Financial health */
+.health { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.health-score {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 0 4px;
+  padding: 16px 22px;
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+.health-score__num { grid-row: 1; font-size: 3rem; font-weight: 800; line-height: 1; }
+.health-score__max { grid-row: 1; font-size: 1rem; color: var(--text-faint); }
+.health-score__tier { grid-row: 2; grid-column: 1 / -1; margin-top: 6px; font-weight: 700; }
+.health-score--good .health-score__num, .health-score--good .health-score__tier { color: var(--accent); }
+.health-score--ok .health-score__num, .health-score--ok .health-score__tier { color: #38bdf8; }
+.health-score--warn .health-score__num, .health-score--warn .health-score__tier { color: #fbbf24; }
+.health-score--bad .health-score__num, .health-score--bad .health-score__tier { color: var(--danger); }
+.health-metrics { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px; }
+.health-metric__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+}
+.health-metric__detail { color: var(--text-muted); }
+.health-bar { height: 8px; border-radius: 999px; background: var(--bg-hover); overflow: hidden; }
+.health-bar__fill { height: 100%; border-radius: 999px; }
+.health-bar__fill--good { background: var(--accent); }
+.health-bar__fill--ok { background: #38bdf8; }
+.health-bar__fill--warn { background: #fbbf24; }
+.health-bar__fill--bad { background: var(--danger); }
+
+/* Achievements */
+.badges__count { font-weight: 800; color: var(--accent); }
+.badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.badge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  text-align: center;
+  align-items: center;
+}
+.badge--locked { opacity: 0.5; }
+.badge--earned { border-color: rgba(74, 222, 128, 0.4); }
+.badge__emoji { font-size: 1.6rem; line-height: 1; }
+.badge__title { font-weight: 700; font-size: 0.9rem; }
+.badge__desc { font-size: 0.72rem; color: var(--text-muted); }
+
+/* Lifetime stats */
+.life-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.life-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+.life-stat__label { font-size: 0.78rem; color: var(--text-muted); }
+.life-stat__value { font-size: 1.25rem; font-weight: 800; }
+.life-stat__value.pos { color: var(--accent); }
+.life-stat__value.neg { color: var(--danger); }
+.life-stat__sub { font-size: 0.78rem; color: var(--text-muted); }
+.life-stat__sub.pos { color: var(--accent); }
+
 /* Subscriptions / regular payments */
 .subs__head {
   display: flex;

@@ -21,6 +21,9 @@ const SavingsPage = lazy(() =>
   import('./pages/SavingsPage').then((m) => ({ default: m.SavingsPage })),
 )
 const MacroPage = lazy(() => import('./pages/MacroPage').then((m) => ({ default: m.MacroPage })))
+const ProfilePage = lazy(() =>
+  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+)
 const SettingsPage = lazy(() =>
   import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 )
@@ -38,6 +41,7 @@ const ROUTES: Record<string, RouteDef> = {
   '/analysis': { title: 'Аналітика', element: <AnalysisPage /> },
   '/savings': { title: 'Заощадження', element: <SavingsPage /> },
   '/macro': { title: 'Макроекономіка', element: <MacroPage /> },
+  '/profile': { title: 'Профіль', element: <ProfilePage /> },
   '/settings': { title: 'Налаштування', element: <SettingsPage /> },
 }
 

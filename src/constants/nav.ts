@@ -14,5 +14,6 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/analysis', label: 'Аналітика', icon: 'analysis' },
   { path: '/savings', label: 'Заощадження', icon: 'savings' },
   { path: '/macro', label: 'Макро', icon: 'macro' },
+  { path: '/profile', label: 'Профіль', icon: 'profile' },
   { path: '/settings', label: 'Налаштування', icon: 'settings' },
 ]
