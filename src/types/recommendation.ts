@@ -1,7 +1,7 @@
 import type { CurrencyCode } from './settings'
 
 export type Confidence = 'high' | 'medium' | 'low'
-export type RecoCategory = 'cashflow' | 'budget' | 'savings' | 'currency' | 'positive'
+export type RecoCategory = 'cashflow' | 'budget' | 'savings' | 'currency' | 'positive' | 'anomaly'
 
 export interface Recommendation {
   id: string

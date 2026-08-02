@@ -13,6 +13,7 @@ import { buildPlanFact } from '../calculations/planFact'
 import { buildSavingsSummary } from '../calculations/savings'
 import { buildWeeklyReport } from '../calculations/weekly'
 import { buildRecommendations, type RecoContext } from '../calculations/recommendations'
+import { detectAnomalies } from '../calculations/anomalies'
 import type { Recommendation } from '../types/recommendation'
 
 export function useRecommendations(): Recommendation[] {
@@ -83,12 +84,15 @@ export function useRecommendations(): Recommendation[] {
     // Weekly budget.
     const weekReport = buildWeeklyReport(week, budget, transactions, categories, today)
 
+    const anomalies = detectAnomalies(transactions, categories, accounts, rates, base, month)
+
     const ctx: RecoContext = {
       base,
       hasAccounts: accounts.length > 0,
       hasPlan: planItems.length > 0,
       forecast,
       overspent,
+      anomalies,
       emergency: {
         coverageMonths: summary.coverageMonths,
         targetMonths: summary.targetMonths,

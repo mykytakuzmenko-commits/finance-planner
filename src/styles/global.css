@@ -1829,6 +1829,9 @@ h3 {
 .reco--positive {
   border-left-color: #38bdf8;
 }
+.reco--anomaly {
+  border-left-color: #fb923c;
+}
 .reco__head {
   display: flex;
   align-items: center;

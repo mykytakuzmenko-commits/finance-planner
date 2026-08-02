@@ -17,6 +17,8 @@ export interface RecoContext {
   forecast: DashboardForecast
   /** Overspent expense categories (base minor units), most over first. */
   overspent: { name: string; over: number }[]
+  /** Categories spending far above their own typical level this month. */
+  anomalies: { name: string; current: number; avg: number; ratio: number }[]
   emergency: {
     coverageMonths: number
     targetMonths: number
@@ -67,6 +69,17 @@ export function buildRecommendations(ctx: RecoContext): Recommendation[] {
       confidence: 'high',
       category: 'cashflow',
       severity: 90,
+    })
+  }
+
+  for (const a of ctx.anomalies.slice(0, 3)) {
+    push({
+      title: `Незвична витрата: «${a.name}»`,
+      reason: `Цього місяця на «${a.name}» уже витрачено ${fmtHint(a.current)} — це ×${a.ratio.toFixed(1)} від звичного (${fmtHint(a.avg)}).`,
+      action: 'Перегляньте операції в цій категорії — можливо, разова велика витрата.',
+      confidence: a.ratio >= 2.5 ? 'high' : 'medium',
+      category: 'anomaly',
+      severity: 85,
     })
   }
 
