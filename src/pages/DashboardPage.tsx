@@ -210,12 +210,6 @@ export function DashboardPage() {
               {money(forecast.safeToSpend)}
             </strong>
           </span>
-          <svg className="balance-hero__art" viewBox="0 0 120 90" aria-hidden="true">
-            <rect x="12" y="20" width="96" height="60" rx="12" fill="#0f1220" opacity="0.55" />
-            <rect x="12" y="20" width="96" height="60" rx="12" fill="none" stroke="#4ade80" strokeWidth="2" opacity="0.5" />
-            <rect x="70" y="42" width="42" height="20" rx="6" fill="#4ade80" opacity="0.9" />
-            <circle cx="88" cy="52" r="5" fill="#0f1220" />
-          </svg>
         </div>
 
         <div className="kpi-stat kpi-stat--income">

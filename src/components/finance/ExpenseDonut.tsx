@@ -38,6 +38,7 @@ export function ExpenseDonut({ data, currency }: Props) {
             outerRadius={82}
             paddingAngle={2}
             stroke="none"
+            isAnimationActive={false}
           >
             {slices.map((_, i) => (
               <Cell key={i} fill={COLORS[i % COLORS.length]} />

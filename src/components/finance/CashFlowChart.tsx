@@ -65,14 +65,15 @@ export function CashFlowChart({ data, currency }: Props) {
             cursor={{ fill: 'rgba(255,255,255,0.03)' }}
             content={<CustomTooltip currency={currency} />}
           />
-          <Bar dataKey="income" fill="#4ade80" radius={[4, 4, 0, 0]} maxBarSize={16} />
-          <Bar dataKey="expense" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={16} />
+          <Bar dataKey="income" fill="#4ade80" radius={[4, 4, 0, 0]} maxBarSize={16} isAnimationActive={false} />
+          <Bar dataKey="expense" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={16} isAnimationActive={false} />
           <Line
             type="monotone"
             dataKey="net"
             stroke="#a78bfa"
             strokeWidth={2}
             dot={{ r: 3, fill: '#a78bfa' }}
+            isAnimationActive={false}
           />
         </ComposedChart>
       </ResponsiveContainer>
